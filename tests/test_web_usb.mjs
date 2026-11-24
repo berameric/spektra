@@ -1,7 +1,7 @@
-// Node test for the WebUSB HDX driver (docs/hdx-usb.js) against a fake device speaking OBP:
+// Node test for the WebUSB HDX driver (src/device/hdx-usb.js) against a fake device speaking OBP:
 // node tests/test_web_usb.mjs
 import assert from "node:assert/strict";
-import { HDX_PIXELS, HDXUSB } from "../docs/hdx-usb.js";
+import { HDX_PIXELS, HDXUSB } from "../src/device/hdx-usb.js";
 
 const START = 0xc0c1, END = 0xc2c3c4c5;
 

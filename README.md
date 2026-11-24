@@ -96,22 +96,38 @@ exposure, number of averaged scans, boxcar width and whether a dark spectrum was
 
 ## Running locally
 
+There is no build step: the repository root is the site.
+
 ```bash
-python3 -m http.server -d docs 8000      # then open http://localhost:8000 in Chrome or Edge
+npm start      # = python3 -m http.server 8000; then open http://localhost:8000 in Chrome or Edge
 ```
 
 Any static file server works; `localhost` counts as a secure origin, so WebUSB is available.
+For GitHub Pages, publish the `main` branch from the repository root (`/`).
 
 ## Repository layout
 
 ```
-docs/               the application, served as-is (e.g. by GitHub Pages)
-  index.html        page and styles
-  app.js            interface, plotting, acquisition and export
-  hdx-usb.js        WebUSB driver for the HDX (Ocean Binary Protocol)
-  analysis.js       peak analysis
-  vendor/           uPlot 1.6.32 (MIT licence)
-tests/              Node tests (no dependencies)
+index.html              page markup
+src/
+  main.js               entry point: wires the controls to the modules
+  config.js             instrument limits, detection criteria, colours
+  state.js              application state, display-unit conversion
+  util.js               DOM, number and storage helpers
+  acquisition.js        connect, acquire, live view, exposure, dark measurement
+  spectrum.js           frame → display unit, peak detection in the selection, rendering
+  export.js             CSV export with metadata
+  device/hdx-usb.js     WebUSB driver for the HDX (Ocean Binary Protocol)
+  analysis/peaks.js     peak analysis (no DOM; tested in Node)
+  ui/plot.js            spectrum plot, overlays and mouse gestures
+  ui/peaks.js           peaks list and selection display
+  ui/controls.js        button states, signal chain, popovers
+  ui/notify.js          notifications and confirmation dialog
+  ui/environment.js     start-up system check (OS, browser, drivers)
+  ui/theme.js           light / dark theme
+  styles/spektra.css    styles
+vendor/uplot/           uPlot 1.6.32 (MIT licence)
+tests/                  Node tests (no dependencies)
 ```
 
 ## Tests

@@ -1,6 +1,6 @@
-// Node test for the browser analysis port (docs/analysis.js): node tests/test_web_analysis.mjs
+// Node test for the browser analysis port (src/analysis/peaks.js): node tests/test_web_analysis.mjs
 import assert from "node:assert/strict";
-import { HC_EV_NM, boxcar, evToNm, findPeaks, findSpectralPeaks, nmToEv, peakExtent } from "../docs/analysis.js";
+import { HC_EV_NM, boxcar, evToNm, findPeaks, findSpectralPeaks, nmToEv, peakExtent } from "../src/analysis/peaks.js";
 
 // Deterministic Gaussian noise (Box-Muller over a small LCG)
 let seed = 42;
