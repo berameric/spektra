@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spektra — HDX Spectrometer</title>
+<link rel="stylesheet" href="vendor/uPlot.min.css">
+<style>
+:root {
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Monochrome UI (controls black on light, white on dark); orange (--hl) only marks data: the selected range */
+  --bg: #f1f1f1; --panel: #ffffff; --panel-2: #f7f7f7; --border: #e1e1e1; --border-strong: #c8c8c8;
+  --text: #111111; --muted: #6b6b6b; --accent: #111111; --accent-hover: #3a3a3a; --accent-text: #ffffff; --hl: #ea580c;
+  --ok: #16a34a; --warn: #b45309; --bad: #dc2626; --bad-fill: #dc2626;
+  --trace: #1a1a1a; --grid: rgba(0, 0, 0, 0.07);
+  --select: rgba(234, 88, 12, 0.09); --pop-shadow: 0 6px 16px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #090909; --panel: #131313; --panel-2: #1a1a1a; --border: #252525; --border-strong: #353535;
+  --text: #ededed; --muted: #8a8a8a; --accent: #ededed; --accent-hover: #c9c9c9; --accent-text: #0a0a0a; --hl: #f97316;
+  --ok: #22c55e; --warn: #f5b041; --bad: #f05252; --bad-fill: #c42b2b;
+  --trace: #e8e8e8; --grid: rgba(255, 255, 255, 0.07);
+  --select: rgba(249, 115, 22, 0.13); --pop-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #090909; --panel: #131313; --panel-2: #1a1a1a; --border: #252525; --border-strong: #353535;
+    --text: #ededed; --muted: #8a8a8a; --accent: #ededed; --accent-hover: #c9c9c9; --accent-text: #0a0a0a; --hl: #f97316;
+    --ok: #22c55e; --warn: #f5b041; --bad: #f05252; --bad-fill: #c42b2b;
+    --trace: #e8e8e8; --grid: rgba(255, 255, 255, 0.07);
+    --select: rgba(249, 115, 22, 0.13); --pop-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 var(--font);
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr);
+  accent-color: var(--accent); caret-color: var(--text);
+}
+::selection { background: var(--select); color: var(--text); }
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.spacer { flex: 1; }
+[hidden] { display: none !important; }
+svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---- controls ---- */
+.btn {
+  font: inherit; font-weight: 500; height: 32px; padding: 0 12px; border-radius: 8px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px; white-space: nowrap;
+  border: 1px solid var(--border-strong); background: var(--panel); color: var(--text);
+  transition: background .15s ease-out, border-color .15s ease-out, color .15s ease-out;
+}
+.btn:hover:not(:disabled) { border-color: var(--muted); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn.stop { background: var(--bad-fill); border-color: var(--bad-fill); color: #fff; }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.ghost:hover:not(:disabled) { background: var(--panel-2); border-color: var(--border); }
+.btn.icon { width: 32px; padding: 0; }
+.btn.small { height: 28px; padding: 0 10px; font-size: 12px; }
+.btn.small.icon { width: 28px; padding: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+input[type="number"], input[type="text"] {
+  font: inherit; font-family: var(--font-mono); font-variant-numeric: tabular-nums; height: 30px; width: 76px;
+  padding: 0 8px; text-align: right; border: 1px solid var(--border-strong); border-radius: 8px;
+  background: var(--panel); color: var(--text);
+}
+.stepper { display: inline-flex; align-items: center; height: 32px; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; }
+.stepper input { border: 0; border-radius: 0; height: 30px; width: 64px; background: transparent; }
+.stepper .unit { padding-right: 8px; color: var(--muted); font-size: 12px; }
+.stepper button {
+  width: 30px; height: 30px; display: grid; place-items: center; border: 0; background: transparent; color: var(--text); cursor: pointer;
+}
+.stepper button:hover:not(:disabled) { background: var(--panel-2); }
+.stepper button:disabled, .stepper input:disabled { opacity: .4; cursor: default; }
+.stepper button:first-child { border-right: 1px solid var(--border); }
+.stepper button:last-child { border-left: 1px solid var(--border); }
+
+.seg { display: inline-flex; padding: 2px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--border); }
+.seg button {
+  font: inherit; font-weight: 500; border: 0; background: transparent; color: var(--muted);
+  padding: 3px 14px; border-radius: 6px; cursor: pointer;
+}
+.seg button.on { background: var(--accent); color: var(--accent-text); }
+
+.switch { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; white-space: nowrap; }
+.switch input { position: absolute; opacity: 0; pointer-events: none; }
+.switch span {
+  width: 30px; height: 18px; border-radius: 999px; background: var(--border-strong);
+  position: relative; transition: background .15s ease-out; flex: none;
+}
+.switch span::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; transition: transform .18s cubic-bezier(.2, .8, .2, 1); box-shadow: 0 1px 2px rgba(0,0,0,.25);
+}
+.switch input:checked + span { background: var(--accent); }
+.switch input:checked + span::after { transform: translateX(12px); background: var(--accent-text); }
+.switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.label { font-size: 12px; color: var(--muted); }
+
+/* ---- front panel (top bar) ---- */
+.panel-bar {
+  display: flex; align-items: center; gap: 14px; padding: 9px 16px; background: var(--panel);
+  border-bottom: 1px solid var(--border); flex-wrap: wrap; row-gap: 8px;
+}
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 650; font-size: 14px; letter-spacing: -0.01em; margin-right: 6px; }
+.brand svg.i { width: 20px; height: 20px; stroke-width: 2; }
+.group { display: flex; align-items: center; gap: 8px; }
+.vr { width: 1px; height: 24px; background: var(--border); }
+.device { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.led { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); flex: none; }
+.led.on { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 20%, transparent); }
+.led.live { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+#devInfo { color: var(--muted); }
+.led.on + #devInfo { color: var(--text); }
+.btn.live { min-width: 88px; }
+.btn.live .i-stop { display: none; }
+.btn.live.stop .i-stop { display: block; }
+.btn.live.stop .i-play { display: none; }
+#scanInfo { font-size: 12px; color: var(--muted); }
+
+/* ---- workspace ---- */
+.work { display: grid; grid-template-columns: minmax(0, 1fr) 340px; min-height: 0; }
+.plot-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--panel); }
+.pane-head {
+  display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px 0 16px; flex: none;
+  border-bottom: 1px solid var(--border);
+}
+#cursorRo { font-size: 12px; color: var(--muted); }
+.badge { font-size: 11px; font-weight: 700; letter-spacing: .04em; padding: 4px 9px; border-radius: 6px; color: #fff; background: var(--bad-fill); }
+.sel-chip {
+  display: inline-flex; align-items: center; gap: 2px; height: 28px; padding: 0 3px 0 11px; font-size: 12px;
+  border-radius: 999px; border: 1px solid var(--hl); background: var(--select); color: var(--text);
+}
+.sel-chip button {
+  display: grid; place-items: center; border: 0; background: transparent; color: var(--muted); cursor: pointer;
+  width: 22px; height: 22px; border-radius: 50%;
+}
+.sel-chip button:hover { color: var(--text); background: var(--select); }
+.sel-chip svg.i { width: 13px; height: 13px; }
+.plot-wrap { flex: 1; min-height: 0; position: relative; padding: 6px 8px 4px 4px; }
+.plot { position: absolute; inset: 6px 8px 4px 4px; }
+.plot .u-select { background: var(--select); }
+.plot .u-over { cursor: crosshair; }
+.plot-empty {
+  position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; text-align: center;
+}
+.plot-empty div { max-width: 360px; padding: 18px 22px; background: color-mix(in srgb, var(--panel) 88%, transparent); border-radius: 12px; }
+.plot-empty b { display: block; font-size: 15px; margin-bottom: 4px; }
+.plot-empty p { margin: 0; color: var(--muted); }
+.plot-empty p + p { margin-top: 8px; }
+.plot-empty .warn { color: var(--warn); }
+
+/* ---- peaks rail ---- */
+.rail { display: flex; flex-direction: column; min-height: 0; background: var(--panel); border-left: 1px solid var(--border); }
+.rail .pane-head { padding: 0 14px 0 16px; }
+.rail h2 { margin: 0; font-size: 13px; font-weight: 650; }
+.count {
+  min-width: 20px; padding: 0 6px; border-radius: 999px; font-size: 11px; text-align: center;
+  background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
+}
+.scope { padding: 8px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
+.scope b { color: var(--text); font-weight: 500; }
+.peak-list { list-style: none; margin: 0; padding: 4px 0; overflow-y: auto; flex: 1; min-height: 0; }
+.peak-list:empty { display: none; }
+.pk {
+  display: grid; grid-template-columns: 12px 22px minmax(0, 1fr) auto; column-gap: 8px; row-gap: 1px; align-items: baseline;
+  padding: 8px 16px; border-bottom: 1px solid var(--border);
+}
+.pk:last-child { border-bottom: 0; }
+.pk .pdot { width: 10px; height: 10px; border-radius: 50%; align-self: center; }
+.pk .n { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pk .wl { font: 600 14px var(--font-mono); font-variant-numeric: tabular-nums; }
+.pk .wl small, .pk .ct small { font: 400 11px var(--font); color: var(--muted); margin-left: 3px; }
+.pk .ct { font: 500 13px var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.pk .sub { grid-column: 3 / 5; font-size: 11.5px; color: var(--muted); font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.pk.max .n { color: var(--text); font-weight: 650; }
+.pk.max .pdot { width: 12px; height: 12px; margin-left: -1px; }
+.rail-empty { padding: 28px 22px; color: var(--muted); text-align: center; }
+.rail-empty b { display: block; color: var(--text); font-weight: 600; margin-bottom: 4px; }
+
+/* ---- signal chain (bottom bar) ---- */
+.chain {
+  display: flex; align-items: center; gap: 4px; padding: 6px 12px; background: var(--panel);
+  border-top: 1px solid var(--border); overflow-x: auto; white-space: nowrap;
+}
+.chain .label { margin: 0 8px 0 4px; }
+.chain > svg.i { color: var(--border-strong); width: 14px; height: 14px; }
+.stage {
+  font: inherit; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 10px;
+  border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--text); cursor: pointer;
+}
+.stage:hover { background: var(--panel-2); border-color: var(--border); }
+.stage[aria-expanded="true"] { background: var(--panel-2); border-color: var(--border-strong); }
+.stage .k { color: var(--muted); }
+.stage .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 500; }
+.stage .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.stage .dot.ok { background: var(--ok); } .stage .dot.warn { background: var(--warn); } .stage .dot.bad { background: var(--bad); }
+
+/* ---- popovers ---- */
+[popover] {
+  margin: 0; inset: auto; position: fixed; padding: 14px; min-width: 240px; color: var(--text);
+  background: var(--panel); border: 1px solid var(--border-strong); border-radius: 12px; box-shadow: var(--pop-shadow);
+  opacity: 0; transform: translateY(4px); transition: opacity .16s ease-out, transform .16s ease-out, display .16s allow-discrete, overlay .16s allow-discrete;
+}
+[popover]:popover-open { opacity: 1; transform: none; }
+@starting-style { [popover]:popover-open { opacity: 0; transform: translateY(4px); } }
+.pop h3 { margin: 0 0 10px; font-size: 13px; font-weight: 650; }
+.pop p { margin: 8px 0 0; font-size: 12px; color: var(--muted); max-width: 260px; }
+.pop .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pop .row + .row { margin-top: 10px; }
+.presets { display: flex; gap: 4px; margin-top: 10px; }
+.presets button {
+  font: inherit; font-size: 12px; font-family: var(--font-mono); height: 26px; min-width: 38px; padding: 0 8px;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--panel-2); color: var(--text); cursor: pointer;
+}
+.presets button:hover { border-color: var(--muted); }
+.presets button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.status-line { font-size: 12px; font-weight: 600; margin-top: 10px; }
+.status-line.ok { color: var(--ok); } .status-line.warn { color: var(--warn); } .status-line.bad { color: var(--bad); }
+.menu { padding: 6px; min-width: 220px; }
+.menu button {
+  font: inherit; width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--text); cursor: pointer; text-align: left;
+}
+.menu button:hover:not(:disabled) { background: var(--panel-2); }
+.menu button:disabled { opacity: .4; cursor: default; }
+.menu button small { display: block; color: var(--muted); font-size: 11.5px; }
+.help dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 12px; }
+.help dt { font-weight: 600; white-space: nowrap; }
+.help dd { margin: 0; color: var(--muted); }
+
+/* ---- dialog & toasts ---- */
+dialog {
+  border: 1px solid var(--border-strong); border-radius: 14px; background: var(--panel); color: var(--text);
+  padding: 20px 22px; width: min(420px, calc(100vw - 32px)); box-shadow: var(--pop-shadow);
+}
+dialog::backdrop { background: rgba(0, 0, 0, .4); }
+dialog h3 { margin: 0 0 8px; font-size: 15px; }
+dialog p { margin: 0 0 18px; color: var(--muted); }
+dialog .actions { display: flex; justify-content: flex-end; gap: 8px; }
+dialog.env { width: min(540px, calc(100vw - 32px)); }
+.env-system { margin: 0 0 14px; font-size: 12px; }
+.env-system b { color: var(--text); font-weight: 600; }
+.env-list { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 10px; }
+.env-list > li { padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel-2); }
+.env-list h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 13px; }
+.env-list h4::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); flex: none; }
+.env-list .env-block h4::before { background: var(--bad); }
+.env-list .env-ready h4::before { background: var(--ok); }
+.env-list p, .env-list ol { margin: 6px 0 0; color: var(--muted); font-size: 12.5px; }
+.env-list ol { padding-left: 18px; }
+.env-list li li + li { margin-top: 3px; }
+.env-list a { color: var(--text); text-underline-offset: 2px; }
+.env-list code, .env-list pre { font-family: var(--font-mono); font-size: 11.5px; background: var(--panel); border: 1px solid var(--border); border-radius: 5px; }
+.env-list code { padding: 0 4px; color: var(--text); }
+.env-list pre { margin: 8px 0 0; padding: 8px 10px; overflow-x: auto; color: var(--text); }
+dialog .actions { align-items: center; }
+#toasts { position: fixed; right: 16px; bottom: 60px; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
+.toast {
+  display: flex; align-items: flex-start; gap: 10px; max-width: 420px; padding: 10px 14px; border-radius: 10px;
+  background: var(--panel); color: var(--text); border: 1px solid var(--border-strong); box-shadow: var(--pop-shadow);
+  transition: opacity .3s ease-out, transform .3s ease-out;
+}
+.toast::before { content: ""; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: var(--muted); flex: none; }
+.toast.ok::before { background: var(--ok); }
+.toast.bad::before { background: var(--bad); }
+.toast.out { opacity: 0; transform: translateY(6px); }
+
+@media (max-width: 1100px) {
+  .brand span { display: none; }
+}
+@media (max-width: 900px) {
+  body { height: auto; min-height: 100%; }
+  .panel-bar { padding: 8px 16px; }
+  .vr { display: none; }
+  .work { grid-template-columns: minmax(0, 1fr); align-content: start; background: var(--panel); }
+  #scanInfo { display: none; }
+  .plot-pane { height: 440px; }
+  .rail { border-left: 0; border-top: 1px solid var(--border); max-height: 420px; }
+  #cursorRo { display: none; }
+  #toasts { left: 16px; right: 16px; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-logo" viewBox="0 0 24 24"><path d="M2 19h3l3-9 3 12 3-18 3 13 2-5h3"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 4v6h6"/><path d="M20 12a8 8 0 1 0-2.4 5.7"/><path d="M4.6 10A8 8 0 0 1 12 4"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.2-2.5 3.6"/><path d="M12 17.2v.1"/></symbol>
+  <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol>
+  <symbol id="i-usb" viewBox="0 0 24 24"><path d="M12 3v13"/><path d="M9 6l3-3 3 3"/><path d="M12 13l-4-3V8"/><path d="M12 11l4-2V7"/><circle cx="12" cy="18" r="2.5"/></symbol>
+</svg>
+
+<header class="panel-bar">
+  <div class="brand"><svg class="i"><use href="#i-logo"/></svg><span>Spektra</span></div>
+
+  <div class="device">
+    <span class="led" id="led"></span><span id="devInfo">Not connected</span>
+  </div>
+  <div class="group">
+    <button id="connectBtn" class="btn primary"><svg class="i"><use href="#i-usb"/></svg><span id="connectLabel">Connect HDX</span></button>
+  </div>
+
+  <div class="vr"></div>
+
+  <div class="group">
+    <button id="acqBtn" class="btn">Acquire</button>
+    <button id="liveBtn" class="btn primary live">
+      <svg class="i i-play"><use href="#i-play"/></svg><svg class="i i-stop"><use href="#i-stop"/></svg><span id="liveLabel">Live</span>
+    </button>
+  </div>
+
+  <div class="vr"></div>
+
+  <div class="group" title="Integration time of one scan">
+    <span class="label">Exposure</span>
+    <div class="stepper">
+      <button id="intDown" title="Shorter" aria-label="Shorter exposure"><svg class="i"><use href="#i-minus"/></svg></button>
+      <input id="intInput" type="text" inputmode="decimal" value="100" aria-label="Exposure in ms">
+      <span class="unit">ms</span>
+      <button id="intUp" title="Longer" aria-label="Longer exposure"><svg class="i"><use href="#i-plus"/></svg></button>
+    </div>
+    <label class="switch" title="Adjust the exposure so the highest peak sits near 80 % of full scale">
+      <input type="checkbox" id="autoInt"><span></span>Auto
+    </label>
+  </div>
+
+  <div class="spacer"></div>
+  <span class="mono" id="scanInfo"></span>
+  <button class="btn" id="exportBtn" popovertarget="exportPop"><svg class="i"><use href="#i-dl"/></svg>Export<svg class="i"><use href="#i-down"/></svg></button>
+  <button class="btn ghost icon" id="themeBtn" title="Light / dark theme" aria-label="Toggle light or dark theme"><svg class="i"><use href="#i-theme"/></svg></button>
+</header>
+
+<main class="work">
+  <section class="plot-pane" aria-label="Spectrum">
+    <div class="pane-head">
+      <span class="mono" id="cursorRo"></span>
+      <div class="spacer"></div>
+      <span class="badge" id="satBadge" hidden>SATURATED</span>
+      <span class="sel-chip" id="selChip" hidden>
+        <span class="mono" id="selText"></span>
+        <button id="selClear" title="Clear selection (Esc)" aria-label="Clear selection"><svg class="i"><use href="#i-x"/></svg></button>
+      </span>
+      <button class="btn ghost small icon" popovertarget="helpPop" title="Plot controls" aria-label="Plot controls"><svg class="i"><use href="#i-help"/></svg></button>
+      <button class="btn ghost small icon" id="resetView" title="Reset view (double-click)" aria-label="Reset view"><svg class="i"><use href="#i-reset"/></svg></button>
+    </div>
+    <div class="plot-wrap">
+      <div id="plot" class="plot"></div>
+      <div class="plot-empty" id="plotEmpty">
+        <div>
+          <b>No spectrum yet</b>
+          <p>Plug in the HDX, press Connect HDX and then Live.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="rail" aria-label="Peaks">
+    <div class="pane-head">
+      <h2>Peaks</h2><span class="count" id="peakCount">0</span>
+      <div class="spacer"></div>
+      <label class="switch"><input type="checkbox" id="detectChk"><span></span>Detect</label>
+    </div>
+    <div class="scope" id="detectScope" hidden></div>
+    <ol class="peak-list" id="peakList"></ol>
+    <div class="rail-empty" id="peakEmpty"></div>
+  </aside>
+</main>
+
+<footer class="chain" aria-label="Signal chain">
+  <span class="label">Signal chain</span>
+  <button class="stage" popovertarget="avgPop"><span class="k">Average</span><span class="v" id="avgStage">1 scan</span></button>
+  <svg class="i"><use href="#i-chev"/></svg>
+  <button class="stage" popovertarget="darkPop"><span class="dot" id="darkDot"></span><span class="k">Dark</span><span class="v" id="darkStage">none</span></button>
+  <svg class="i"><use href="#i-chev"/></svg>
+  <button class="stage" popovertarget="boxcarPop"><span class="k">Boxcar</span><span class="v" id="boxcarStage">off</span></button>
+  <svg class="i"><use href="#i-chev"/></svg>
+  <button class="stage" popovertarget="displayPop"><span class="k">Display</span><span class="v" id="displayStage">nm · auto Y</span></button>
+</footer>
+
+<!-- signal-chain editors -->
+<div popover class="pop" id="avgPop">
+  <h3>Average</h3>
+  <div class="row"><span class="label">Scans per spectrum</span><input id="avgInput" type="number" min="1" max="1000" value="1"></div>
+  <div class="presets" data-for="avgInput"><button>1</button><button>5</button><button>10</button><button>25</button><button>100</button></div>
+  <p>Mean of several scans. Less noise, slower update.</p>
+</div>
+<div popover class="pop" id="darkPop">
+  <h3>Dark background</h3>
+  <div class="row"><span class="label">Scans to average</span><input id="darkAvg" type="number" min="1" max="500" value="10"></div>
+  <div class="row">
+    <button id="darkBtn" class="btn primary small">Take dark…</button>
+    <button id="darkClear" class="btn small">Clear</button>
+  </div>
+  <div class="row"><label class="switch"><input type="checkbox" id="subDark" checked><span></span>Subtract from spectrum</label></div>
+  <div id="darkStatus" class="status-line"></div>
+</div>
+<div popover class="pop" id="boxcarPop">
+  <h3>Boxcar smoothing</h3>
+  <div class="row"><span class="label">Half width</span><span><input id="boxcarInput" type="number" min="0" max="50" value="0"> <span class="label">px</span></span></div>
+  <div class="presets" data-for="boxcarInput"><button>0</button><button>1</button><button>2</button><button>3</button><button>5</button></div>
+  <p>Each pixel becomes the mean of its neighbours. 0 turns it off. Broadens narrow lines.</p>
+</div>
+<div popover class="pop" id="displayPop">
+  <h3>Display</h3>
+  <div class="row"><span class="label">X axis</span>
+    <div class="seg" id="unitSeg"><button data-unit="nm" class="on">nm</button><button data-unit="eV">eV</button></div>
+  </div>
+  <div class="row"><label class="switch"><input type="checkbox" id="autoY" checked><span></span>Auto-scale Y</label></div>
+</div>
+<div popover class="pop menu" id="exportPop">
+  <button id="csvBtn"><svg class="i"><use href="#i-dl"/></svg><span>Spectrum<small>Every pixel: wavelength, energy, intensity</small></span></button>
+  <button id="peaksCsvBtn"><svg class="i"><use href="#i-dl"/></svg><span>Peaks<small>The detected peaks in the list</small></span></button>
+</div>
+<div popover class="pop help" id="helpPop">
+  <h3>Plot controls</h3>
+  <dl>
+    <dt>Drag</dt><dd>Select a range — peaks are searched only there</dd>
+    <dt>Click a peak</dt><dd>Select the whole peak</dd>
+    <dt>Drag an edge</dt><dd>Adjust the selection</dd>
+    <dt>Esc</dt><dd>Clear the selection</dd>
+    <dt>Wheel</dt><dd>Zoom</dd>
+    <dt>Shift + drag</dt><dd>Pan</dd>
+    <dt>Double-click</dt><dd>Reset the view</dd>
+  </dl>
+  <button class="btn small" id="envOpen" style="margin-top:12px">System check…</button>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog">
+    <h3 id="dlgTitle"></h3>
+    <p id="dlgText"></p>
+    <div class="actions"><button value="cancel" class="btn ghost">Cancel</button><button value="ok" class="btn primary">OK</button></div>
+  </form>
+</dialog>
+<dialog id="envDlg" class="env">
+  <form method="dialog">
+    <h3 id="envTitle">Before you connect</h3>
+    <p class="env-system">Detected: <b id="envSystem"></b></p>
+    <ul class="env-list" id="envList"></ul>
+    <div class="actions">
+      <label class="switch" id="envHideRow"><input type="checkbox" id="envHide"><span></span>Don’t show again on this computer</label>
+      <div class="spacer"></div>
+      <button value="ok" class="btn primary" autofocus>OK</button>
+    </div>
+  </form>
+</dialog>
+<div id="toasts" aria-live="polite"></div>
+
+<script src="vendor/uPlot.iife.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
