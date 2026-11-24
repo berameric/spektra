@@ -7,7 +7,7 @@ Developed at the Nano Optoelectronics Laboratories, Istanbul University.
 
 ## Getting started
 
-1. Open Spektra in Google Chrome or Microsoft Edge.
+1. Open **[berameric.github.io/spektra](https://berameric.github.io/spektra/)** in Google Chrome or Microsoft Edge.
 2. Plug in the HDX and press **Connect HDX**.
 3. Choose the HDX in the browser's device dialog, then press **Live**.
 
