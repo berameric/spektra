@@ -1,6 +1,7 @@
 {
   "name": "spektra",
   "private": true,
+  "license": "MIT",
   "description": "Browser acquisition and peak analysis for the Ocean Insight HDX spectrometer",
   "type": "module",
   "scripts": {

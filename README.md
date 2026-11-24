@@ -68,3 +68,7 @@ npm test     # Node 18+
 [Bilal Bera Meriç](https://github.com/berameric) — Nano Optoelectronics Laboratories, Istanbul University.
 
 Plotting by [uPlot](https://github.com/leeoniya/uPlot) (MIT).
+
+## License
+
+[MIT](LICENSE)
