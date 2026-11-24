@@ -50,6 +50,7 @@ svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor;
   border: 1px solid var(--border-strong); background: var(--panel); color: var(--text);
   transition: background .15s ease-out, border-color .15s ease-out, color .15s ease-out;
 }
+a.btn { text-decoration: none; }
 .btn:hover:not(:disabled) { border-color: var(--muted); }
 .btn:disabled { opacity: .4; cursor: default; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
