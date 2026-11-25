@@ -38,6 +38,11 @@ a.btn { text-decoration: none; }
 .btn:hover:not(:disabled) { border-color: var(--muted); }
 .btn:disabled { opacity: .4; cursor: default; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.btn .spin { display: none; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin .8s linear infinite; }
+.btn.busy .spin { display: inline-block; }
+.btn.busy .ico { display: none; }
+.btn.busy:disabled { opacity: .8; cursor: progress; }
+@keyframes spin { to { transform: rotate(360deg); } }
 .btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
 
 .btn.ghost { background: transparent; border-color: transparent; }

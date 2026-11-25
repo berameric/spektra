@@ -9,6 +9,7 @@ import { S, fromDisp, intensityUnit, toDisp, dispRange } from "../state.js";
 import { $, clamp, cssVar, fmt } from "../util.js";
 import { drawOverview, initOverview } from "./overview.js";
 import { drawOverlays } from "./plot-overlays.js";
+import { isCompact } from "./mobile.js";
 import { markRows } from "./peaks.js";
 
 let u = null;
@@ -28,6 +29,16 @@ export function initPlot(handlers) {
 
 // ---------------------------------------------------------------- axes
 const decimalsFor = (incr) => (!incr || incr >= 1 ? 0 : incr >= 0.1 ? 1 : incr >= 0.01 ? 2 : 3);
+
+/**
+ * Minimum gap between X ticks, from the width the labels will need: uPlot spaces ticks by a fixed
+ * distance, so long labels (zoomed in: "546.25") or a narrow phone screen would make them overlap.
+ */
+function xSpace(_u, _axis, min, max, dim) {
+  const incr = (max - min) / Math.max(dim / 70, 1);
+  const chars = Math.max(String(Math.round(Math.abs(max))).length, String(Math.round(Math.abs(min))).length) + (decimalsFor(incr) ? decimalsFor(incr) + 1 : 0);
+  return chars * (isCompact() ? 6.5 : 7) + (isCompact() ? 30 : 26);
+}
 
 function plainTicks(_u, splits, _axis, _space, incr) {
   const d = decimalsFor(incr);
@@ -72,9 +83,10 @@ export function createPlot(keepX, keepY = keepX) {
     trace: cssVar("--trace"), border: cssVar("--border-strong"), text: cssVar("--text"), bad: cssVar("--bad"),
     font: cssVar("--font"), mono: cssVar("--font-mono"),
   };
+  const small = isCompact();
   const axis = {
     stroke: C.muted, grid: { stroke: C.grid, width: 1 }, ticks: { stroke: C.grid, width: 1 },
-    font: `11px ${C.mono}`, labelFont: `12px ${C.font}`, values: plainTicks,
+    font: `${small ? 10 : 11}px ${C.mono}`, labelFont: `${small ? 11 : 12}px ${C.font}`, values: plainTicks,
   };
   const eV = S.unit === "eV";
   u = new uPlot({
@@ -87,8 +99,8 @@ export function createPlot(keepX, keepY = keepX) {
       { stroke: C.muted, width: 1, dash: [5, 4], points: { show: false } },
     ],
     axes: [
-      { ...axis, label: eV ? "Photon energy (eV)" : "Wavelength (nm)", labelSize: 22 },
-      { ...axis, label: `Intensity (${intensityUnit()}${S.logY ? ", log" : ""})`, size: 52, labelSize: 22, values: compactTicks },
+      { ...axis, label: eV ? "Photon energy (eV)" : "Wavelength (nm)", labelSize: small ? 16 : 22, space: xSpace, size: small ? 40 : 50 },
+      { ...axis, label: `Intensity (${intensityUnit()}${S.logY ? ", log" : ""})`, size: small ? 44 : 52, labelSize: small ? 16 : 22, values: compactTicks, space: small ? 26 : 30 },
     ],
     cursor: { drag: { x: true, y: false, setScale: false, dist: 4 }, points: { show: false } },
     hooks: {
