@@ -374,6 +374,7 @@ input[type="number"], input[type="text"] {
 .foot-link { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 6px; font-size: 12px; color: var(--muted); text-decoration: none; }
 .foot-link:hover { color: var(--text); background: var(--panel-2); }
 .foot-link svg.i { width: 14px; height: 14px; }
+.foot-small { font-size: 11px; opacity: .8; }
 .stage[aria-expanded="true"] { background: var(--panel-2); border-color: var(--border-strong); }
 .stage .k { color: var(--muted); }
 .stage .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 500; }
