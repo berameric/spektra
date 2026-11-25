@@ -21,6 +21,8 @@ Application: <https://berameric.github.io/spektra/> · Version 2.0.0 ([changelog
 On first start, Spektra checks the operating system and browser and lists any preparation still required
 (see [Platform requirements](#platform-requirements)).
 
+If the instrument does not connect, see [Troubleshooting](docs/TROUBLESHOOTING.md).
+
 ## Features
 
 | | |
