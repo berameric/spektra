@@ -53,7 +53,7 @@ On first start Spektra checks your system and says if anything is still missing 
 | macOS, ChromeOS | Nothing |
 | Windows | The WinUSB driver, once per computer |
 | Linux | A udev rule, once per computer |
-| Android | Chrome and a USB-C (OTG) adapter; the phone powers the HDX. Use it in landscape |
+| Android | Chrome and a USB-C (OTG) adapter; the HDX runs on its own power supply. Use it in landscape |
 | iPhone, iPad | Not possible: no iOS browser supports WebUSB |
 
 <details>

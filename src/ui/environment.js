@@ -44,8 +44,8 @@ function environmentNotes({ os, browser }) {
   if (os === "Android" && HDXUSB.supported()) {
     notes.push({
       level: "setup", title: "Android: connect over USB OTG",
-      html: "<p>Use a USB-C (OTG) adapter or cable. The phone or tablet has to power the HDX over USB; "
-        + "if it does not show up, try a powered USB hub. Hold the phone sideways.</p>",
+      html: "<p>Connect the HDX (on its own power supply) with a USB-C (OTG) adapter or cable, "
+        + "and hold the phone sideways.</p>",
     });
   }
   if (os === "Windows") {
