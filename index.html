@@ -35,10 +35,6 @@
   <symbol id="i-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></symbol>
   <symbol id="i-minimize" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></symbol>
   <symbol id="i-rotate" viewBox="0 0 24 24"><rect width="12" height="20" x="6" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
-  <!-- Processing (drawn for Spektra): mean of scans, dark background, boxcar smoothing -->
-  <symbol id="i-mean" viewBox="0 0 24 24"><path d="M6 4.5h12"/><path d="M7 9l10 11"/><path d="M17 9 7 20"/></symbol>
-  <symbol id="i-dark" viewBox="0 0 24 24"><path d="M2 19h7l3-13 3 13h7"/><path d="M5 4l14 16"/></symbol>
-  <symbol id="i-smooth" viewBox="0 0 24 24"><path d="M2 13l1.5-4 1.5 7 1.5-6 1.5 5 1.5-3"/><path d="M11 12c2.5 0 3-4 5.5-4s3 4 5.5 4"/></symbol>
   <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
@@ -222,11 +218,11 @@
 
 <footer class="chain" aria-label="Processing">
   <span class="label">Processing</span>
-  <button class="stage" popovertarget="avgPop" title="Average several scans into one spectrum" aria-label="Averaging"><svg class="i st-ico"><use href="#i-mean"/></svg><span class="st-short mono" id="avgShort">1×</span><span class="st-cap">Avg</span><span class="k">Averaging</span><span class="v" id="avgStage">1 scan</span><svg class="i caret"><use href="#i-down"/></svg></button>
+  <button class="stage" popovertarget="avgPop" title="Average several scans into one spectrum" aria-label="Averaging"><span class="st-short mono" id="avgShort">1×</span><span class="k">Averaging</span><span class="v" id="avgStage">1 scan</span><svg class="i caret"><use href="#i-down"/></svg></button>
   <svg class="i"><use href="#i-chev"/></svg>
-  <button class="stage" id="darkStageBtn" popovertarget="darkPop" title="Detector background subtraction" aria-label="Dark background"><span class="dot" id="darkDot"></span><svg class="i st-ico"><use href="#i-dark"/></svg><span class="st-short mono" id="darkShort">none</span><span class="st-cap">Dark</span><span class="k">Dark</span><span class="v" id="darkStage">none</span><svg class="i caret"><use href="#i-down"/></svg></button>
+  <button class="stage" id="darkStageBtn" popovertarget="darkPop" title="Detector background subtraction" aria-label="Dark background"><span class="dot" id="darkDot"></span><span class="st-short mono" id="darkShort">none</span><span class="k">Dark</span><span class="v" id="darkStage">none</span><svg class="i caret"><use href="#i-down"/></svg></button>
   <svg class="i"><use href="#i-chev"/></svg>
-  <button class="stage" popovertarget="boxcarPop" title="Boxcar smoothing over neighbouring pixels" aria-label="Smoothing"><svg class="i st-ico"><use href="#i-smooth"/></svg><span class="st-short mono" id="boxcarShort">off</span><span class="st-cap">Smooth</span><span class="k">Smoothing</span><span class="v" id="boxcarStage">off</span><svg class="i caret"><use href="#i-down"/></svg></button>
+  <button class="stage" popovertarget="boxcarPop" title="Boxcar smoothing over neighbouring pixels" aria-label="Smoothing"><span class="st-short mono" id="boxcarShort">off</span><span class="k">Smoothing</span><span class="v" id="boxcarStage">off</span><svg class="i caret"><use href="#i-down"/></svg></button>
   <div class="spacer"></div>
   <span class="mono chain-sum" id="chainSum"></span>
   <span class="vr"></span>
