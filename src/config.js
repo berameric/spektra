@@ -23,5 +23,8 @@ export const STORE_HINTS = "spektra.hints.v1";
 export const STORE_GUIDE = "spektra.guide.v1";
 export const STORE_RAIL = "spektra.rail.v1";
 
+// Diagnostics page for the instrument (read-only): add ?diag to the address, on the published site too
+export const DIAG = new URLSearchParams(location.search).has("diag");
+
 // Development: http://localhost:8000/?mock replaces the HDX with a simulated one (src/device/mock-hdx.js)
 export const MOCK = ["localhost", "127.0.0.1"].includes(location.hostname) && new URLSearchParams(location.search).has("mock");

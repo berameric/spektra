@@ -435,6 +435,11 @@ dialog h3 { margin: 0 0 8px; font-size: 15px; }
 dialog p { margin: 0 0 18px; color: var(--muted); }
 dialog .actions { display: flex; justify-content: flex-end; gap: 8px; }
 dialog.env { width: min(540px, calc(100vw - 32px)); }
+/* ?diag page */
+dialog.diag { width: min(900px, calc(100vw - 32px)); }
+.diag canvas { display: block; width: 100%; height: 200px; margin: 6px 0 2px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel-2); }
+.diag .diag-legend { margin: 0 0 8px; font: 11.5px var(--font-mono); }
+.diag pre { margin: 0 0 14px; padding: 10px 12px; max-height: 240px; overflow: auto; font: 11.5px/1.5 var(--font-mono); color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; white-space: pre-wrap; }
 .env-system { margin: 0 0 14px; font-size: 12px; }
 .env-system b { color: var(--text); font-weight: 600; }
 .env-list { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 10px; }

@@ -61,5 +61,15 @@ export class MockHDX {
     return out;
   }
 
+  /** Same as HDXUSB.readMessage: both spectrum messages return the simulated spectrum as 16-bit pixels. */
+  async readMessage(msgType) {
+    if (msgType !== 0x00101000 && msgType !== 0x00101100) throw new Error("HDX error 2: unknown message type");
+    const px = await this.intensities();
+    const out = new Uint8Array(px.length * 2);
+    const v = new DataView(out.buffer);
+    px.forEach((c, i) => v.setUint16(2 * i, c, true));
+    return out;
+  }
+
   async close() {}
 }

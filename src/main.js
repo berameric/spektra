@@ -11,6 +11,7 @@ import { initHints } from "./ui/hints.js";
 import { initPeakTable, markRows, peakTableText } from "./ui/peaks.js";
 import { initRail, setRailCollapsed } from "./ui/rail.js";
 import { initMobile, isCompact } from "./ui/mobile.js";
+import { initDiag } from "./ui/diag.js";
 import { checkEnvironment, initEnvironment } from "./ui/environment.js";
 import { toast } from "./ui/notify.js";
 import { initPlot, redrawPlot, resetView, zoomToPeak, zoomToSelection } from "./ui/plot.js";
@@ -31,6 +32,7 @@ initPlot({ setSelection, clearSelection, reanalyze, hoverPeak: setHoverPeak });
 initRail();
 initMobile(() => setRailCollapsed(true)); // phones start with the peaks drawer closed
 initPopovers();
+initDiag(); // ?diag only
 initHints();
 initPeakTable({
   onHover: setHoverPeak,

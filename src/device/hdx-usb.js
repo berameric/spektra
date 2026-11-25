@@ -300,6 +300,14 @@ export class HDXUSB {
     return Float64Array.from({ length: HDX_PIXELS }, (_, i) => v.getUint16(2 * i, true));
   }
 
+  /**
+   * Diagnostics only: send a request without payload and return the reply payload as bytes. Used by the
+   * ?diag page to compare spectrum messages; only for messages that read, never for ones that change settings.
+   */
+  async readMessage(msgType, timeoutMs = Math.floor(this.intUs / 1000) + 300) {
+    return this._query(msgType, undefined, timeoutMs);
+  }
+
   async close() {
     this.reading = false;
     try { await this.dev.releaseInterface(0); } catch { /* already released */ }
