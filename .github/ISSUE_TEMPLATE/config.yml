@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How the driver talks to the instrument
+    url: https://github.com/berameric/spektra/blob/main/docs/PROTOCOL.md
+    about: Message types, framing and what is known about each model.

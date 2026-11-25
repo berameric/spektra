@@ -1,0 +1,46 @@
+name: Instrument report
+description: Tried Spektra with an Ocean Insight model other than the HDX, or with an experimental profile.
+labels: ["instrument support"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you: a report from someone with the hardware is how a model gets supported. If Spektra showed
+        a "not supported yet" dialog, its **Open a GitHub issue** button fills this in for you.
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      description: As printed on the instrument, with the firmware version if you know it.
+      placeholder: STS-VIS, firmware 1.2
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: What Spektra did
+      options:
+        - Showed "not supported yet"
+        - Opened as experimental; spectra look right
+        - Opened as experimental; something looks wrong
+        - Did not connect
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Checks
+      description: |
+        For an experimental model: do the wavelength axis, the exposure time and the count level
+        (compared with OceanView, if you have it) look right?
+  - type: textarea
+    id: report
+    attributes:
+      label: Report from Spektra
+      description: The report from the "not supported yet" dialog (Copy report). It holds no serial number.
+      render: json
+  - type: input
+    id: platform
+    attributes:
+      label: Browser and operating system
+      placeholder: Chrome 131 on Ubuntu 24.04
