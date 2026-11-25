@@ -1,7 +1,13 @@
 # Spektra
 
-Web-based software for the **Ocean Insight HDX** spectrometer. It runs in the browser and talks to the
-instrument directly over USB (WebUSB): nothing to install.
+Free, open-source software for the **Ocean Insight HDX** spectrometer (Ocean Optics). It runs in the browser
+and talks to the instrument directly over USB (WebUSB): nothing to install, no OceanView licence needed.
+Live spectra, automatic peak detection with FWHM, wavelength (nm) and photon-energy (eV) axes, dark
+subtraction, averaging and CSV export.
+
+**[Open Spektra →](https://berameric.github.io/spektra/)**
+
+![Spektra showing a live spectrum with detected peaks (simulated data)](assets/screenshot.png)
 
 Developed at the Nano Optoelectronics Laboratories, Istanbul University.
 
