@@ -1,68 +1,113 @@
-// Spectrum plot (uPlot): axes, overlays for the selection and peaks, cursor readout and mouse gestures.
+// Spectrum plot (uPlot): axes, linear or log intensity, a held reference
+// curve, cursor readout and mouse gestures. Overlays are drawn in plot-overlays.js, the overview in overview.js.
 // Mouse: drag = select range, click = whole peak, edge drag, shift-drag pan, wheel zoom, double-click reset.
 
 import { peakExtent, evToNm, nmToEv } from "../analysis/peaks.js";
-import { DEFAULT_RANGE, peakColor } from "../config.js";
-import { S, dispRange, fromDisp, intensityUnit, toDisp } from "../state.js";
-import { $, clamp, cssVar, fmt, withAlpha } from "../util.js";
+import { DEFAULT_RANGE, loadPeakColors } from "../config.js";
+import { S, fromDisp, intensityUnit, toDisp, dispRange } from "../state.js";
+import { $, clamp, cssVar, fmt } from "../util.js";
+import { drawOverview, initOverview } from "./overview.js";
+import { drawOverlays } from "./plot-overlays.js";
+import { markRows } from "./peaks.js";
 
 let u = null;
 let C = {}; // theme colours for canvas drawing
-let H = {}; // selection handlers: { setSelection(a, b), clearSelection(), reanalyze() }
+let H = {}; // handlers: { setSelection(a, b), clearSelection(), reanalyze(), hoverPeak(i) }
 
 /** Create the first plot; `handlers` receive the selections made on it. */
 export function initPlot(handlers) {
   H = handlers;
   createPlot(false);
+  initOverview(setX);
   new ResizeObserver(() => {
     const el = $("plot");
     if (u && el.clientWidth && el.clientHeight) u.setSize({ width: el.clientWidth, height: el.clientHeight });
   }).observe($("plot"));
 }
 
+// ---------------------------------------------------------------- axes
+const decimalsFor = (incr) => (!incr || incr >= 1 ? 0 : incr >= 0.1 ? 1 : incr >= 0.01 ? 2 : 3);
+
 function plainTicks(_u, splits, _axis, _space, incr) {
-  const d = incr >= 1 ? 0 : incr >= 0.1 ? 1 : incr >= 0.01 ? 2 : 3;
+  const d = decimalsFor(incr);
   return splits.map((v) => v.toFixed(d));
 }
 
-/** (Re)build the plot, e.g. after a theme or unit change; `keepX` / `keepY` keep the current zoom. */
+/** Intensity ticks: 42 500 → 42.5k, 1 200 000 → 1.2M. A log axis passes null for unlabelled ticks. */
+function compactTicks(_u, splits, _axis, _space, incr) {
+  return splits.map((v) => {
+    if (v == null) return null;
+    const a = Math.abs(v);
+    if (a >= 1e6) return `${+(v / 1e6).toFixed(incr >= 1e6 || !incr ? 0 : 1)}M`;
+    if (a >= 1e4) return `${+(v / 1e3).toFixed(incr >= 1e3 || !incr ? 0 : 1)}k`;
+    return v.toFixed(decimalsFor(incr));
+  });
+}
+
+// ---------------------------------------------------------------- data
+let nulls = [];
+/** Series for uPlot: x, the spectrum and the held reference; a log scale needs positive values. */
+function plotArrays() {
+  if (!S.disp) return [[], [], []];
+  const n = S.disp.x.length;
+  const pos = (y) => (S.logY ? Float64Array.from(y, (v) => (v > 1 ? v : 1)) : y);
+  let ref = S.refDisp && S.refDisp.y.length === n ? pos(S.refDisp.y) : null;
+  if (!ref) {
+    if (nulls.length !== n) nulls = new Array(n).fill(null);
+    ref = nulls;
+  }
+  return [S.disp.x, pos(S.disp.y), ref];
+}
+
+/** (Re)build the plot, e.g. after a theme, unit or scale change; `keepX` / `keepY` keep the current zoom. */
 export function createPlot(keepX, keepY = keepX) {
   const el = $("plot");
   const prevX = keepX && u ? [u.scales.x.min, u.scales.x.max] : null;
   const prevY = keepY && u ? [u.scales.y.min, u.scales.y.max] : null;
   if (u) u.destroy();
+  loadPeakColors();
   C = {
     muted: cssVar("--muted"), grid: cssVar("--grid"), panel: cssVar("--panel"), hl: cssVar("--hl"),
-    trace: cssVar("--trace"),
+    trace: cssVar("--trace"), border: cssVar("--border-strong"), text: cssVar("--text"), bad: cssVar("--bad"),
     font: cssVar("--font"), mono: cssVar("--font-mono"),
   };
   const axis = {
     stroke: C.muted, grid: { stroke: C.grid, width: 1 }, ticks: { stroke: C.grid, width: 1 },
     font: `11px ${C.mono}`, labelFont: `12px ${C.font}`, values: plainTicks,
   };
+  const eV = S.unit === "eV";
   u = new uPlot({
     width: el.clientWidth || 600, height: el.clientHeight || 300,
     legend: { show: false },
-    scales: { x: { time: false, auto: false }, y: { auto: false } },
-    series: [{}, { stroke: C.trace, width: 1.25, points: { show: false } }],
+    scales: { x: { time: false, auto: false }, y: { auto: false, distr: S.logY ? 3 : 1, log: 10 } },
+    series: [
+      {},
+      { stroke: C.trace, width: 1.25, points: { show: false } },
+      { stroke: C.muted, width: 1, dash: [5, 4], points: { show: false } },
+    ],
     axes: [
-      { ...axis, label: S.unit === "eV" ? "Photon energy (eV)" : "Wavelength (nm)", labelSize: 22 },
-      { ...axis, label: `Intensity (${intensityUnit()})`, size: 64, labelSize: 22 },
+      { ...axis, label: eV ? "Photon energy (eV)" : "Wavelength (nm)", labelSize: 22 },
+      { ...axis, label: `Intensity (${intensityUnit()}${S.logY ? ", log" : ""})`, size: 52, labelSize: 22, values: compactTicks },
     ],
     cursor: { drag: { x: true, y: false, setScale: false, dist: 4 }, points: { show: false } },
-    hooks: { draw: [drawOverlays], setSelect: [onSelect], setCursor: [onCursor] },
-  }, S.disp ? [S.disp.x, S.disp.y] : [[], []], el);
+    hooks: {
+      draw: [(uu) => { drawOverlays(uu, C); drawOverview(uu, C); }],
+      setSelect: [onSelect], setCursor: [onCursor],
+    },
+  }, plotArrays(), el);
   installInteractions(u);
 
   const xr = prevX && prevX[0] != null ? prevX : (S.disp ? dataXRange() : DEFAULT_RANGE[S.unit]);
-  const yr = prevY && prevY[0] != null ? prevY : (S.yRange || [0, 65535 * 1.05]);
+  let yr = prevY && prevY[0] != null ? prevY : (S.yRange || [0, 65535 * 1.05]);
+  if (S.logY && yr[0] <= 0) yr = [1, 1e5];
   u.batch(() => {
     u.setScale("x", { min: xr[0], max: xr[1] });
     u.setScale("y", { min: yr[0], max: yr[1] });
   });
 }
 
-function dataXRange() {
+/** The full data range with a small margin. */
+export function dataXRange() {
   const x = S.disp.x;
   const pad = 0.02 * (x[x.length - 1] - x[0]);
   return [x[0] - pad, x[x.length - 1] + pad];
@@ -71,13 +116,14 @@ function dataXRange() {
 /** Draw S.disp; `resetX` fits the X axis to the data, `autoY` rescales Y when needed. */
 export function plotData(resetX, autoY) {
   u.batch(() => {
-    u.setData([S.disp.x, S.disp.y], false);
+    u.setData(plotArrays(), false);
+    let win;
     if (resetX) {
-      const [a, b] = dataXRange();
-      u.setScale("x", { min: a, max: b });
+      win = dataXRange();
+      u.setScale("x", { min: win[0], max: win[1] });
     }
     if (autoY) {
-      const yr = autoscaleY();
+      const yr = autoscaleY(false, win);
       if (yr) u.setScale("y", { min: yr[0], max: yr[1] });
     }
   });
@@ -86,81 +132,108 @@ export function plotData(resetX, autoY) {
 /** Redraw the overlays without new data. */
 export const redrawPlot = () => u.redraw(false, false);
 
+/** The plot canvas (axes, curves and overlays) for exporting an image. */
+export const plotCanvas = () => u.ctx.canvas;
+
 export function resetView() {
   S.yRange = null;
+  if (S.focusPeak >= 0) {
+    S.focusPeak = -1;
+    markRows();
+  }
   if (!S.disp) {
     const [a, b] = DEFAULT_RANGE[S.unit];
     u.setScale("x", { min: a, max: b });
     return;
   }
   const [a, b] = dataXRange();
+  setX(a, b, true);
+}
+
+/**
+ * Every change of the visible X range goes through here. uPlot applies scale changes later, so the
+ * new window is passed on explicitly: Y is fitted to the data inside it (with Auto Y on, or `fit`).
+ */
+function setX(min, max, fit = $("autoY").checked) {
   u.batch(() => {
-    u.setScale("x", { min: a, max: b });
-    const yr = autoscaleY(true);
-    if (yr) u.setScale("y", { min: yr[0], max: yr[1] });
+    u.setScale("x", { min, max });
+    if (fit && S.disp) {
+      const yr = autoscaleY(true, [min, max]);
+      if (yr) u.setScale("y", { min: yr[0], max: yr[1] });
+    }
   });
 }
 
-/** Y range that only changes when the data no longer fits or the view is far too loose. */
-function autoscaleY(force = false) {
-  const y = S.disp.y;
+/** Zoom to a peak: ±3 FWHM (at least ±2 nm) around it, intensity fitted to that window. */
+export function zoomToPeak(p) {
+  const half = Math.max(3 * (Number.isFinite(p.fwhmNm) ? p.fwhmNm : 0), 2);
+  const [a, b] = dispRange(p.measuredPeak - half, p.measuredPeak + half);
+  setX(a, b, true);
+}
+
+/** Zoom to the selected range with a 5 % margin. */
+export function zoomToSelection() {
+  if (!S.sel) return;
+  const [a, b] = dispRange(S.sel.lo, S.sel.hi);
+  const pad = 0.05 * (b - a);
+  setX(a - pad, b + pad, true);
+}
+
+/** Y range of the data in the visible X range; it only changes when the data no longer fits or the view is far too loose. */
+function autoscaleY(force = false, win = [u.scales.x.min, u.scales.x.max]) {
+  const { x, y } = S.disp;
+  const [x0, x1] = win;
   let lo = Infinity, hi = -Infinity;
-  for (const v of y) { if (v < lo) lo = v; if (v > hi) hi = v; }
-  const span = Math.max(hi - lo, 50);
-  const want = [lo - 0.1 * span, hi + 0.18 * span];
-  const cur = S.yRange;
-  if (cur && !force) {
-    const h = cur[1] - cur[0];
-    const fits = cur[0] <= lo && hi <= cur[1] - 0.05 * h;
-    const tooLoose = ((hi - lo) < 0.45 * h && span > 50) || Math.max(hi - lo, 50) < 0.25 * h;
-    if (fits && !tooLoose) return null;
+  for (let i = 0; i < y.length; i++) {
+    if (x[i] < x0 || x[i] > x1) continue;
+    const v = S.logY ? Math.max(y[i], 1) : y[i];
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
   }
+  if (lo > hi) return null; // nothing visible
+  const cur = S.yRange;
+  let want, fits, tooLoose;
+  if (S.logY) {
+    // Whole decades, so the ticks fall on 1, 10, 100 … with room below the baseline and above the strongest peak
+    want = [10 ** Math.floor(Math.log10(Math.max(1, lo / 1.3))), 10 ** Math.ceil(Math.log10(hi * 1.3))];
+    fits = cur && cur[0] <= lo && hi <= cur[1] / 1.15;
+    tooLoose = cur && cur[1] / cur[0] > 30 * (want[1] / want[0]);
+  } else {
+    // Counts are not negative: start at zero unless a subtracted dark leaves noise just below it
+    const span = Math.max(hi - lo, 50);
+    want = [lo >= 0 ? Math.max(0, lo - 0.1 * span) : lo - 0.05 * span, hi + 0.18 * span];
+    const h = cur ? cur[1] - cur[0] : 0;
+    fits = cur && cur[0] <= lo && hi <= cur[1] - 0.05 * h;
+    tooLoose = cur && (((hi - lo) < 0.45 * h && span > 50) || Math.max(hi - lo, 50) < 0.25 * h);
+  }
+  if (cur && !force && fits && !tooLoose) return null;
   S.yRange = want;
   return want;
 }
 
-// ---------------------------------------------------------------- overlays drawn on the uPlot canvas
-function drawOverlays(u) {
-  const ctx = u.ctx, bbox = u.bbox, pr = uPlot.pxRatio;
-  const X = (v) => u.valToPos(v, "x", true), Y = (v) => u.valToPos(v, "y", true);
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(bbox.left, bbox.top, bbox.width, bbox.height);
-  ctx.clip();
-
-  // Selected range
-  if (S.sel) {
-    const [a, b] = dispRange(S.sel.lo, S.sel.hi);
-    const x1 = X(a), x2 = X(b);
-    ctx.fillStyle = withAlpha(C.hl, 0.12);
-    ctx.fillRect(x1, bbox.top, x2 - x1, bbox.height);
-    ctx.strokeStyle = C.hl;
-    ctx.lineWidth = 1.5 * pr;
-    ctx.beginPath();
-    ctx.moveTo(x1, bbox.top); ctx.lineTo(x1, bbox.top + bbox.height);
-    ctx.moveTo(x2, bbox.top); ctx.lineTo(x2, bbox.top + bbox.height);
-    ctx.stroke();
-  }
-
-  // Detected peaks: colour-coded dots only (the list carries the numbers and values)
+// ---------------------------------------------------------------- cursor
+/** Peak whose dot is within 12 px of the pointer, or -1. */
+function peakAt(left, top) {
+  let best = -1, bestD = 12;
   S.peaks.forEach((p, i) => {
-    ctx.beginPath();
-    ctx.arc(X(toDisp(p.measuredPeak)), Y(p.rawIntensity), (i === S.mainPeak ? 6 : 4.5) * pr, 0, 2 * Math.PI);
-    ctx.fillStyle = peakColor(i);
-    ctx.fill();
-    ctx.lineWidth = 1.5 * pr;
-    ctx.strokeStyle = C.panel;
-    ctx.stroke();
+    const v = S.logY ? Math.max(p.rawIntensity, 1) : p.rawIntensity;
+    const d = Math.hypot(u.valToPos(toDisp(p.measuredPeak), "x") - left, u.valToPos(v, "y") - top);
+    if (d < bestD) { best = i; bestD = d; }
   });
-  ctx.restore();
+  return best;
 }
 
-function onCursor(u) {
-  const left = u.cursor.left;
-  if (left == null || left < 0) { $("cursorRo").textContent = ""; return; }
-  const xv = u.posToVal(left, "x");
-  const idx = u.cursor.idx;
-  const yv = idx != null && u.data[1].length ? u.data[1][idx] : null;
+function onCursor(uu) {
+  const left = uu.cursor.left;
+  if (left == null || left < 0) {
+    $("cursorRo").textContent = "";
+    H.hoverPeak?.(-1);
+    return;
+  }
+  H.hoverPeak?.(peakAt(left, uu.cursor.top));
+  const xv = uu.posToVal(left, "x");
+  const idx = uu.cursor.idx;
+  const yv = idx != null && S.disp ? S.disp.y[idx] : null;
   const pos = S.unit === "eV"
     ? `${xv.toFixed(3)} eV  (${fmt(evToNm(xv), 2)} nm)`
     : `${xv.toFixed(2)} nm  (${fmt(nmToEv(xv), 3)} eV)`;
@@ -220,7 +293,7 @@ function installInteractions(plot) {
       }
     } else {
       const dv = ((x - mode.x0) * (mode.max - mode.min)) / over.clientWidth;
-      plot.setScale("x", { min: mode.min - dv, max: mode.max - dv });
+      setX(mode.min - dv, mode.max - dv);
     }
   };
 
@@ -247,12 +320,12 @@ function installInteractions(plot) {
     const { min, max } = plot.scales.x;
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
       const dv = (e.deltaX * (max - min)) / over.clientWidth;
-      plot.setScale("x", { min: min + dv, max: max + dv });
+      setX(min + dv, max + dv);
       return;
     }
     const xv = plot.posToVal(pos(e)[0], "x");
     const f = Math.exp(clamp(e.deltaY, -100, 100) * 0.002);
-    plot.setScale("x", { min: xv - (xv - min) * f, max: xv + (max - xv) * f });
+    setX(xv - (xv - min) * f, xv + (max - xv) * f);
   }, { passive: false });
 
   // Listeners on window outlive a re-created plot; replace the previous ones
