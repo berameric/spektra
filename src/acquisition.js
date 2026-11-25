@@ -1,10 +1,12 @@
 // Instrument actions: connect, single and live acquisition, exposure (manual and auto) and dark measurement.
 
+import { applyCalibration } from "./analysis/calibration.js";
 import { boxcar, estimateBaseline } from "./analysis/peaks.js";
 import { AUTO_INT_BAND, AUTO_INT_TARGET, MOCK } from "./config.js";
 import { UnsupportedInstrument, connectInstrument, isDeviceOf, usbSupported } from "./device/index.js";
 import { requestRender, showFrame } from "./spectrum.js";
 import { S, darkActive, satLevel } from "./state.js";
+import { storedCalibration, updateCalibration } from "./ui/calibration.js";
 import { setDarkStatus, showExposure, updateUi } from "./ui/controls.js";
 import { confirmDialog, toast, toastShowing } from "./ui/notify.js";
 import { showUnsupported } from "./ui/unsupported.js";
@@ -15,7 +17,7 @@ async function acquireFrame() {
   const dev = S.dev, n = S.avg;
   const meta = {
     time: new Date(), model: dev.model, serial: dev.serialNumber, intMs: S.intMs, avg: n, boxcar: S.boxcar,
-    darkMs: darkActive() ? S.darkIntMs : null,
+    darkMs: darkActive() ? S.darkIntMs : null, cal: S.cal,
   };
   let raw = null, rawMax = 0;
   for (let k = 0; k < n; k++) {
@@ -68,13 +70,15 @@ export async function connect() {
     S.fullScale = dev.fullScale;
     S.intLimitsMs = [p.intMinUs / 1000, p.intMaxUs / 1000];
     S.intMs = clamp(S.intMs, ...S.intLimitsMs);
-    S.wl = await dev.wavelengths();
+    S.factoryWl = await dev.wavelengths();
+    S.cal = storedCalibration(dev);
+    S.wl = applyCalibration(S.factoryWl, S.cal);
     await dev.setIntegrationUs(S.intMs * 1000);
     S.dev = dev;
     S.dark = null;
     S.darkIntMs = null;
     S.yRange = null;
-    toast(`Connected: ${dev.model} S/N ${dev.serialNumber}`, "ok");
+    toast(`Connected: ${dev.model} S/N ${dev.serialNumber}${S.cal ? " · wavelength calibration applied" : ""}`, "ok");
     if (!p.verified) {
       toast(`${p.model} has not been tested with Spektra yet. Please report how it works (GitHub).`, "info", 9000, "experimental");
     }
@@ -84,6 +88,7 @@ export async function connect() {
   } finally {
     S.busy = false;
     updateUi();
+    updateCalibration();
   }
 }
 

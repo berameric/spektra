@@ -3,6 +3,7 @@
 import { energySpectrum, nmToEv } from "./analysis/peaks.js";
 import { AUTO_PEAKS } from "./config.js";
 import { S, perMev } from "./state.js";
+import { calText } from "./ui/calibration.js";
 import { toast } from "./ui/notify.js";
 import { plotCanvas } from "./ui/plot.js";
 import { cssVar, fmt } from "./util.js";
@@ -18,7 +19,17 @@ function metaHeader(title, extra = []) {
     `# averages: ${m.avg}`,
     `# boxcar_half_width_px: ${m.boxcar}`,
     `# dark_subtracted: ${m.darkMs !== null ? `yes (dark at ${m.darkMs} ms)` : "no"}`,
+    ...calibrationHeader(m.cal),
     ...extra,
+  ];
+}
+
+/** How the wavelength axis was calibrated: the instrument's own, or with Spektra's correction on top of it. */
+function calibrationHeader(cal) {
+  if (!cal) return ["# wavelength_calibration: factory (stored in the instrument)"];
+  return [
+    `# wavelength_calibration: ${calText(cal)}`,
+    `# wavelength_correction: lambda = lambda_factory + sum(c_k * u^k), u = (lambda_factory - 600 nm) / 400 nm, c_k [nm] = ${cal.coeffs.map((c) => c.toExponential(6)).join(", ")}`,
   ];
 }
 
@@ -72,7 +83,7 @@ export function exportPlotPng() {
   ctx.fillStyle = cssVar("--muted");
   ctx.font = `${11 * pr}px ${cssVar("--font")}`;
   ctx.textBaseline = "middle";
-  ctx.fillText(`Spektra · ${m.model} S/N ${m.serial} · ${m.intMs} ms × ${m.avg} · ${m.darkMs !== null ? "dark subtracted" : "no dark"} · ${m.time.toISOString().slice(0, 19).replace("T", " ")} UTC`,
+  ctx.fillText(`Spektra · ${m.model} S/N ${m.serial} · ${m.intMs} ms × ${m.avg} · ${m.darkMs !== null ? "dark subtracted" : "no dark"}${m.cal ? " · λ calibrated" : ""} · ${m.time.toISOString().slice(0, 19).replace("T", " ")} UTC`,
     12 * pr, src.height + foot / 2);
   out.toBlob((blob) => saveBlob(blob, `plot_${stamp()}.png`), "image/png");
 }

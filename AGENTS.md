@@ -15,7 +15,7 @@ install: the repository root is the site (GitHub Pages serves `main` as is).
 - **JavaScript, not TypeScript.** Types live in names and short JSDoc comments (`/** … */`) on exported or
   non-obvious functions. Do not add `.ts` files or type-only tooling.
 - **Analysis stays pure.** `src/analysis/` has no DOM access and runs in Node; keep it that way and cover
-  changes with `tests/test_web_analysis.mjs`.
+  changes with `tests/test_web_analysis.mjs` and `tests/test_web_calibration.mjs`.
 - **Do not claim hardware support you have not tested.** Only the HDX is verified. Other models go in the
   profile table with `verified: false` and open as "experimental" (see CONTRIBUTING.md).
 - **Model-specific values belong in `src/device/profiles.js`,** never as constants elsewhere: full scale,
@@ -39,7 +39,8 @@ install: the repository root is the site (GitHub Pages serves `main` as is).
 | `src/export.js` | CSV and PNG export |
 | `src/device/` | `index.js` (recognise and open an instrument), `profiles.js` (model table), `usb-link.js` (WebUSB transport), `obp.js` (OBP messages), `obp-instrument.js` (profile-driven spectrometer), `probe.js` (report for unsupported devices), `mock-hdx.js` (same interface) |
 | `src/analysis/peaks.js` | Baseline, peak finding, FWHM, area, Jacobian energy conversion |
-| `src/ui/` | One module per surface: `plot`, `plot-overlays`, `overview`, `peaks`, `rail`, `controls`, `notify`, `environment`, `hints` |
+| `src/analysis/calibration.js` | Reference line sets, matching peaks to lines, wavelength correction fit |
+| `src/ui/` | One module per surface: `plot`, `plot-overlays`, `overview`, `peaks`, `rail`, `controls`, `notify`, `environment`, `hints`, `calibration` |
 | `src/styles/spektra.css` | All styles; design tokens on `:root` |
 | `tests/` | Node tests, no dependencies |
 | `docs/PROTOCOL.md` | How the driver speaks to the instrument; keep it in step with `src/device/` |

@@ -223,6 +223,8 @@
   <button class="stage" id="darkStageBtn" popovertarget="darkPop" title="Detector background subtraction" aria-label="Dark background"><span class="dot" id="darkDot"></span><span class="st-short mono" id="darkShort">none</span><span class="k">Dark</span><span class="v" id="darkStage">none</span><svg class="i caret"><use href="#i-down"/></svg></button>
   <svg class="i"><use href="#i-chev"/></svg>
   <button class="stage" popovertarget="boxcarPop" title="Boxcar smoothing over neighbouring pixels" aria-label="Smoothing"><span class="st-short mono" id="boxcarShort">off</span><span class="k">Smoothing</span><span class="v" id="boxcarStage">off</span><svg class="i caret"><use href="#i-down"/></svg></button>
+  <svg class="i"><use href="#i-chev"/></svg>
+  <button class="stage" id="calStageBtn" popovertarget="calPop" title="Wavelength calibration" aria-label="Wavelength calibration"><span class="dot" id="calDot"></span><span class="st-short mono" id="calShort">fact.</span><span class="k" data-short="λ">Wavelength</span><span class="v" id="calStage">factory</span><svg class="i caret"><use href="#i-down"/></svg></button>
   <div class="spacer"></div>
   <span class="mono chain-sum" id="chainSum"></span>
   <span class="vr"></span>
@@ -257,6 +259,17 @@
   <p>Each pixel becomes the mean of its neighbours: less noise, but lines narrower than the window get wider.</p>
   <p class="pop-calc mono" id="boxcarInfo"></p>
 </div>
+<div popover class="pop" id="calPop">
+  <h3>Wavelength calibration</h3>
+  <p class="pop-lead">The instrument carries its factory calibration. A lamp with known lines corrects what has drifted since; the correction is kept for this instrument in this browser.</p>
+  <div class="row"><span class="label">In use</span><span class="mono" id="calUse">factory</span></div>
+  <p class="pop-calc mono" id="calInfo"></p>
+  <div class="row">
+    <button id="calOpen" class="btn primary small">Calibrate…</button>
+    <button id="calReset" class="btn small">Use factory</button>
+  </div>
+  <p id="calHint"></p>
+</div>
 <div popover class="pop menu" id="exportPop">
   <button id="csvBtn"><svg class="i"><use href="#i-dl"/></svg><span>Spectrum<small>Every pixel: wavelength, energy, counts, counts/meV</small></span></button>
   <button id="peaksCsvBtn"><svg class="i"><use href="#i-dl"/></svg><span>Peaks<small>The detected peaks in the list</small></span></button>
@@ -288,6 +301,35 @@
   </div>
 </div>
 
+<dialog id="calDlg" class="cal">
+  <h3>Wavelength calibration</h3>
+  <p>Light the input with a lamp of known lines and keep its spectrum on screen (Live or Acquire). Spektra finds
+  the lines and fits the correction; untick a line or edit its value if it is wrong.</p>
+  <div class="cal-src">
+    <select id="calSource" aria-label="Light source">
+      <option value="fluorescent">Fluorescent room light</option>
+      <option value="hgar">Mercury-argon lamp</option>
+      <option value="neon">Neon lamp</option>
+      <option value="laser">Laser</option>
+      <option value="custom">My own lines</option>
+    </select>
+    <select id="calLaser" aria-label="Laser" hidden></select>
+    <input id="calCustom" type="text" aria-label="Line wavelengths in nm" placeholder="Lines in nm: 435.833, 546.074" hidden>
+    <button class="btn small" id="calFind"><svg class="i"><use href="#i-reset"/></svg>Find again</button>
+  </div>
+  <p class="cal-note" id="calNote"></p>
+  <div class="cal-table-wrap">
+    <table class="cal-table">
+      <thead><tr><th>Use</th><th>Line, nm</th><th>Measured, nm</th><th>Error, pm</th><th></th></tr></thead>
+      <tbody id="calRows"></tbody>
+    </table>
+  </div>
+  <p class="cal-sum mono" id="calSum"></p>
+  <div class="actions">
+    <button class="btn ghost" id="calCancel">Cancel</button>
+    <button class="btn primary" id="calApply" disabled>Apply</button>
+  </div>
+</dialog>
 <dialog id="dlg">
   <form method="dialog">
     <h3 id="dlgTitle"></h3>

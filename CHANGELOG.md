@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Analysis
+- Wavelength calibration with a lamp of known lines (fluorescent light, mercury-argon, neon, laser or own
+  lines): automatic line matching, offset, linear or quadratic correction with per-line errors, kept per
+  instrument and recorded in exports. The simulated HDX now reports slightly drifted wavelengths.
+
 ## 2.0.0 — 2026-11-25
 
 Spektra 2.0 replaces the earlier desktop program (1.x, Python and Qt) with a browser application:

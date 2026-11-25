@@ -95,6 +95,15 @@ export function toggleReference() {
   requestRender();
 }
 
+/** Use another wavelength axis (calibration applied or removed): the shown spectrum and reference move with it. */
+export function setWavelengths(wl) {
+  const old = S.wl;
+  S.wl = wl;
+  if (S.frame?.wl === old) S.frame = { ...S.frame, wl, meta: { ...S.frame.meta, cal: S.cal } };
+  if (S.ref?.wl === old) S.ref = { ...S.ref, wl };
+  redisplay(true);
+}
+
 /** Recompute the displayed spectrum and its peaks after the axis or its intensity unit changed. */
 function redisplay(keepX) {
   S.yRange = null;

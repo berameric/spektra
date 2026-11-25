@@ -20,6 +20,7 @@ export const STORE_ENV = "hdx.envNotice.v1";
 export const STORE_HINTS = "spektra.hints.v1";
 export const STORE_GUIDE = "spektra.guide.v1";
 export const STORE_RAIL = "spektra.rail.v1";
+export const STORE_CAL = "spektra.calibration.v1"; // wavelength corrections by instrument
 
 // Diagnostics page for the instrument (read-only): add ?diag to the address, on the published site too
 export const DIAG = new URLSearchParams(location.search).has("diag");
