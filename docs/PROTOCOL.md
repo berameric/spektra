@@ -71,6 +71,11 @@ receive buffer is discarded and the request is repeated (Section 4).
 
 **Wavelength calibration.** The instrument stores the coefficients of a polynomial in the pixel index *p*.
 Spektra reads the *n* coefficients *c*ᵢ at connection and computes λ(*p*) = Σᵢ *c*ᵢ *p*ⁱ for *p* = 0 … 2067.
+All coefficient replies share one message type and do not carry the index, so a repeated reply (Section 4) would
+be taken as the answer for the next index and shift every coefficient by one; on the HDX this stretched the axis
+to about 2 × 10⁶ nm. Each coefficient request therefore starts on an emptied receive buffer, the whole set is read
+twice and must agree, and the resulting axis must rise monotonically between 100 and 3 000 nm; otherwise the set
+is read again (up to three times) before connecting fails with an error.
 
 **Spectrum.** The pixel data are the last 4 136 bytes of the reply payload; any bytes before them are metadata
 and are ignored. A shorter payload is reported as an error.

@@ -10,6 +10,13 @@ const SET_ITIME_USEC = 0x00110010;
 const GET_WL_COEFF_COUNT = 0x00180100;
 const GET_WL_COEFF = 0x00180101;
 
+/** An axis an Ocean spectrometer can have: rising, and between the deep UV and the near infrared. */
+function plausibleAxis(wl) {
+  const n = wl.length;
+  for (let i = 1; i < n; i++) if (!(wl[i] > wl[i - 1])) return false;
+  return wl[0] > 100 && wl[n - 1] < 3000;
+}
+
 export class ObpInstrument {
   constructor(device, profile) {
     this.dev = device;
@@ -55,15 +62,31 @@ export class ObpInstrument {
     }
   }
 
-  async wavelengths() {
+  /**
+   * The wavelength coefficients. Every reply to these requests has the same message type, so a repeated reply
+   * (seen on some USB paths) would be taken as the answer for the next index and shift all coefficients by
+   * one, stretching the axis to millions of nm. Each request therefore starts on an emptied buffer.
+   */
+  async _coefficients() {
+    await this.link.drain(50);
     const n = (await this.obp.query(GET_WL_COEFF_COUNT))[0];
     const coeffs = [];
     for (let i = 0; i < n; i++) {
+      await this.link.drain(50);
       const p = await this.obp.query(GET_WL_COEFF, Uint8Array.of(i));
       coeffs.push(new DataView(p.buffer, p.byteOffset, p.byteLength).getFloat32(0, true));
     }
-    return Float64Array.from({ length: this.profile.pixels }, (_, px) =>
-      coeffs.reduce((sum, c, i) => sum + c * px ** i, 0));
+    return coeffs;
+  }
+
+  /** Wavelength of every pixel. The coefficients are read twice and must agree and give a plausible axis. */
+  async wavelengths() {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const a = await this._coefficients(), b = await this._coefficients();
+      const wl = Float64Array.from({ length: this.profile.pixels }, (_, px) => a.reduce((sum, c, i) => sum + c * px ** i, 0));
+      if (a.length === b.length && a.every((c, i) => c === b[i]) && plausibleAxis(wl)) return wl;
+    }
+    throw new ObpError("The wavelength calibration could not be read reliably. Disconnect and connect again.");
   }
 
   async setIntegrationUs(us) {
