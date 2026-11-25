@@ -1,4 +1,4 @@
-// Start-up system check: detects the OS and browser and explains what is still needed to reach the HDX.
+// Start-up system check: detects the OS and browser and explains what is still needed to reach the spectrometer.
 
 import { MOCK, STORE_ENV } from "../config.js";
 import { usbSupported } from "../device/index.js";
@@ -18,7 +18,7 @@ function detectPlatform() {
   return { os, browser };
 }
 
-/** What this computer and browser still need before the HDX can be used. */
+/** What this computer and browser still need before the spectrometer can be used. */
 function environmentNotes({ os, browser }) {
   const notes = [];
   if (os === "iOS") {
@@ -44,17 +44,17 @@ function environmentNotes({ os, browser }) {
   if (os === "Android" && usbSupported()) {
     notes.push({
       level: "setup", title: "Android: connect over USB OTG",
-      html: "<p>Connect the HDX (on its own power supply) with a USB-C (OTG) adapter or cable, "
-        + "and hold the phone sideways.</p>",
+      html: "<p>Connect the spectrometer with a USB-C (OTG) adapter or cable, and hold the phone sideways. "
+        + "The HDX runs on its own power supply.</p>",
     });
   }
   if (os === "Windows") {
     notes.push({
       level: "setup", title: "Windows: install the WinUSB driver once",
-      html: "<ol><li>Plug in the HDX and run <a href=\"https://zadig.akeo.ie\" target=\"_blank\" rel=\"noopener\">Zadig</a> (no installation needed).</li>"
-        + "<li>Choose <i>Options → List All Devices</i> and select the HDX (USB ID <code>2457</code> <code>2003</code>).</li>"
+      html: "<ol><li>Plug in the spectrometer and run <a href=\"https://zadig.akeo.ie\" target=\"_blank\" rel=\"noopener\">Zadig</a> (no installation needed).</li>"
+        + "<li>Choose <i>Options → List All Devices</i> and select the spectrometer (USB ID <code>2457</code> and its product ID, <code>2003</code> for the HDX).</li>"
         + "<li>Select <b>WinUSB</b> as the driver and press <i>Replace Driver</i> or <i>Install Driver</i>.</li></ol>"
-        + "<p>Needed once per computer. Afterwards OceanView no longer sees the HDX until its driver is restored in Device Manager.</p>",
+        + "<p>Needed once per computer. Afterwards OceanView no longer sees the spectrometer until its driver is restored in Device Manager.</p>",
     });
   }
   if (os === "Linux") {
@@ -62,7 +62,7 @@ function environmentNotes({ os, browser }) {
       level: "setup", title: "Linux: allow USB access once",
       html: "<p>Create <code>/etc/udev/rules.d/99-ocean-hdx.rules</code> with:</p>"
         + "<pre>SUBSYSTEM==\"usb\", ATTR{idVendor}==\"2457\", ATTR{idProduct}==\"2003\", MODE=\"0666\"</pre>"
-        + "<p>then run <code>sudo udevadm control --reload-rules &amp;&amp; sudo udevadm trigger</code> and replug the HDX.</p>",
+        + "<p>then run <code>sudo udevadm control --reload-rules &amp;&amp; sudo udevadm trigger</code> and replug the spectrometer. For a model other than the HDX, use its product ID or leave <code>ATTR{idProduct}</code> out.</p>",
     });
   }
   return notes;
@@ -78,10 +78,10 @@ export function checkEnvironment(force = false) {
   $("envSystem").textContent = `${env.browser} on ${env.os}`;
   $("envList").innerHTML = notes.length
     ? notes.map((n) => `<li class="env-${n.level}"><h4>${n.title}</h4>${n.html}</li>`).join("")
-    : "<li class=\"env-ready\"><h4>Ready</h4><p>This browser supports WebUSB and this system needs no driver. Plug in the HDX and press Connect.</p></li>";
-  $("envTitle").textContent = blocking ? "This browser cannot connect to the HDX" : notes.length ? "Before you connect" : "System check";
+    : "<li class=\"env-ready\"><h4>Ready</h4><p>This browser supports WebUSB and this system needs no driver. Plug in the spectrometer and press Connect.</p></li>";
+  $("envTitle").textContent = blocking ? "This browser cannot connect to the spectrometer" : notes.length ? "Before you connect" : "System check";
   $("envHideRow").hidden = blocking || !notes.length;
-  // A browser that cannot reach the HDX at all: the notice stays until the page is opened elsewhere
+  // A browser that cannot reach the spectrometer at all: the notice stays until the page is opened elsewhere
   $("envDlg").dataset.blocking = blocking ? "1" : "";
   $("envActions").hidden = blocking;
   $("envDlg").showModal();

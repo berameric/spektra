@@ -32,7 +32,7 @@ Check every value against Ocean Insight's protocol documentation for the model a
 
 ## If you have an instrument but do not write code
 
-Open Spektra, press **Connect HDX** and select your instrument. If it is not supported yet, Spektra shows a
+Open Spektra, press **Connect** and select your instrument. If it is not supported yet, Spektra shows a
 report and an **Open a GitHub issue** button that fills in the issue for you; you can read everything before
 submitting. If your instrument opens as *experimental*, please report whether spectra, wavelengths and
 exposure look right. Someone with the hardware is needed to verify a profile anyway.

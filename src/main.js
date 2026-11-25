@@ -1,4 +1,4 @@
-// Spektra, browser software for the Ocean Insight HDX: live uPlot spectrum, nm/eV axis, range selection and peak detection.
+// Spektra, browser software for Ocean Insight spectrometers (verified on the HDX): live uPlot spectrum, nm/eV axis, range selection and peak detection.
 // Entry point: connects the page controls to the modules and starts the app.
 
 import { acquireOnce, applyIntegration, clearDark, connect, takeDark, toggleLive, watchDevice } from "./acquisition.js";

@@ -68,7 +68,7 @@ function draw(canvas, series) {
 let report = null;
 
 async function run() {
-  if (!S.dev) { toast("Connect the HDX first", "bad", 3000, "diag"); return; }
+  if (!S.dev) { toast("Connect the spectrometer first", "bad", 3000, "diag"); return; }
   if (S.live || S.busy) { toast("Stop Live first", "bad", 3000, "diag"); return; }
   S.busy = true;
   $("diagRun").disabled = true;
