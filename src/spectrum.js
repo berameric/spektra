@@ -3,6 +3,8 @@
 import { energySpectrum, findEnergyPeaks, findSpectralPeaks, nmToEv } from "./analysis/peaks.js";
 import { AUTO_PEAKS, SATURATION } from "./config.js";
 import { S, perMev } from "./state.js";
+import { updateMeter } from "./ui/controls.js";
+import { dismissHint, updateHint } from "./ui/hints.js";
 import { toast } from "./ui/notify.js";
 import { updatePeakList, updateScope } from "./ui/peaks.js";
 import { createPlot, plotData, redrawPlot } from "./ui/plot.js";
@@ -31,6 +33,9 @@ function analyze() {
       if (S.mainPeak < 0 || p.peakIntensity > S.peaks[S.mainPeak].peakIntensity) S.mainPeak = i;
     });
   }
+  // Highlights refer to peaks by number; drop them when that peak no longer exists
+  if (S.hoverPeak >= S.peaks.length) S.hoverPeak = -1;
+  if (S.focusPeak >= S.peaks.length) S.focusPeak = -1;
 }
 
 /** Re-run detection after the selection or the toggle changed. */
@@ -42,6 +47,7 @@ export function reanalyze() {
 
 export function setSelection(a, b) {
   S.sel = { lo: Math.min(a, b), hi: Math.max(a, b) };
+  dismissHint(); // the gesture has been found
   reanalyze();
 }
 
@@ -67,10 +73,33 @@ export function setJacobian(on) {
   if (S.unit === "eV") redisplay(true);
 }
 
+export function setLogY(on) {
+  S.logY = on;
+  S.yRange = null;
+  createPlot(true, false);
+  requestRender();
+}
+
+/** Hold the current spectrum as a reference curve (or drop the held one). */
+export function toggleReference() {
+  if (S.ref) {
+    S.ref = S.refDisp = null;
+    toast("Reference cleared", "info", 2500, "ref");
+  } else if (S.frame) {
+    S.ref = { wl: S.frame.wl, inten: Float64Array.from(S.frame.inten), time: new Date() };
+    S.refDisp = toDisplay(S.ref.wl, S.ref.inten);
+    toast("Reference held — the live spectrum is drawn over it", "ok", 3000, "ref");
+  }
+  $("holdBtn").classList.toggle("on", !!S.ref);
+  $("holdLabel").textContent = S.ref ? "Reference" : "Hold";
+  requestRender();
+}
+
 /** Recompute the displayed spectrum and its peaks after the axis or its intensity unit changed. */
 function redisplay(keepX) {
   S.yRange = null;
   if (S.frame) S.disp = toDisplay(S.frame.wl, S.frame.inten);
+  if (S.ref) S.refDisp = toDisplay(S.ref.wl, S.ref.inten);
   createPlot(keepX, false); // the intensity unit may have changed
   reanalyze();
   requestRender(!keepX && !!S.frame);
@@ -85,6 +114,8 @@ export function showFrame(f) {
   S.saturated = f.rawMax >= SATURATION;
   if (S.saturated && !wasSaturated) {
     toast("Detector saturated — the highest peak is clipped. Shorten the exposure or turn on Auto.", "bad", 6000, "sat");
+  } else if (wasSaturated && !S.saturated) {
+    toast("Signal back in range — no longer saturated", "ok", 3000, "sat");
   }
   analyze();
   requestRender(first);
@@ -105,7 +136,11 @@ function render() {
   else redrawPlot();
   resetXPending = false;
   updatePeakList();
+  updateMeter();
+  updateHint();
   $("satBadge").hidden = !S.saturated;
+  $("csvBtn").disabled = $("pngBtn").disabled = !S.frame;
+  $("holdBtn").disabled = !S.frame && !S.ref;
   $("plotEmpty").hidden = !!S.frame;
   $("scanInfo").textContent = S.live ? `${S.scans} scans · ${S.fps.toFixed(1)} Hz` : "";
 }

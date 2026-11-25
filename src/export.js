@@ -4,7 +4,8 @@ import { energySpectrum, nmToEv } from "./analysis/peaks.js";
 import { AUTO_PEAKS } from "./config.js";
 import { S, perMev } from "./state.js";
 import { toast } from "./ui/notify.js";
-import { fmt } from "./util.js";
+import { plotCanvas } from "./ui/plot.js";
+import { cssVar, fmt } from "./util.js";
 
 /** '#' header lines describing how the current spectrum was measured. */
 function metaHeader(title, extra = []) {
@@ -21,11 +22,21 @@ function metaHeader(title, extra = []) {
   ];
 }
 
+const stamp = () => S.frame.meta.time.toISOString().replace(/[:.]/g, "-").slice(0, 19);
+
+function saveBlob(blob, name) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast(`Saved ${name}`, "ok", 4000);
+}
+
 function download(lines, prefix) {
-  const stamp = S.frame.meta.time.toISOString().replace(/[:.]/g, "-").slice(0, 19);
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([lines.join("\n") + "\n"], { type: "text/csv" }));
-  a.download = `${prefix}_${stamp}.csv`;
+  a.download = `${prefix}_${stamp()}.csv`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   toast(`Saved ${a.download}`, "ok", 4000);
@@ -44,6 +55,26 @@ export function exportSpectrum() {
     lines.push(`${wl[i]},${nmToEv(wl[i])},${inten[i]},${Number.isFinite(factor[i]) ? (inten[i] - offset) * factor[i] : ""}`);
   }
   download(lines, "spectrum");
+}
+
+/** The plot as shown, on the page background, with a line saying how it was measured. */
+export function exportPlotPng() {
+  if (!S.frame) return;
+  const src = plotCanvas(), pr = window.devicePixelRatio || 1, foot = Math.round(26 * pr);
+  const out = document.createElement("canvas");
+  out.width = src.width;
+  out.height = src.height + foot;
+  const ctx = out.getContext("2d");
+  ctx.fillStyle = cssVar("--panel");
+  ctx.fillRect(0, 0, out.width, out.height);
+  ctx.drawImage(src, 0, 0);
+  const m = S.frame.meta;
+  ctx.fillStyle = cssVar("--muted");
+  ctx.font = `${11 * pr}px ${cssVar("--font")}`;
+  ctx.textBaseline = "middle";
+  ctx.fillText(`Spektra · ${m.model} S/N ${m.serial} · ${m.intMs} ms × ${m.avg} · ${m.darkMs !== null ? "dark subtracted" : "no dark"} · ${m.time.toISOString().slice(0, 19).replace("T", " ")} UTC`,
+    12 * pr, src.height + foot / 2);
+  out.toBlob((blob) => saveBlob(blob, `plot_${stamp()}.png`), "image/png");
 }
 
 export function exportPeaks() {

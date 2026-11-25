@@ -10,8 +10,18 @@
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-logo" viewBox="0 0 24 24"><path d="M2 19h3l3-9 3 12 3-18 3 13 2-5h3"/></symbol>
-  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></symbol>
-  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></symbol>
+  <!-- Button icons from Lucide (ISC licence), one stroke weight throughout -->
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L7.5 3.64A1 1 0 0 0 6 4.5Z" fill="currentColor"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5.5" y="5.5" width="13" height="13" rx="2" fill="currentColor"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></symbol>
+  <symbol id="i-unplug" viewBox="0 0 24 24"><path d="m19 5 3-3"/><path d="m2 22 3-3"/><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"/><path d="M7.5 13.5 10 11"/><path d="M10.5 16.5 13 14"/><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-panel-close" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/><path d="m8 9 3 3-3 3"/></symbol>
+  <symbol id="i-panel-open" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/><path d="m10 15-3-3 3-3"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></symbol>
+  <symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v6"/><path d="M8 11h6"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
@@ -20,108 +30,201 @@
   <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
   <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 4v6h6"/><path d="M20 12a8 8 0 1 0-2.4 5.7"/><path d="M4.6 10A8 8 0 0 1 12 4"/></symbol>
   <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.2-2.5 3.6"/><path d="M12 17.2v.1"/></symbol>
-  <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol>
   <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.6.3 2.8.1 3.2.8.8 1.3 1.9 1.3 3.1 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></symbol>
-  <symbol id="i-usb" viewBox="0 0 24 24"><path d="M12 3v13"/><path d="M9 6l3-3 3 3"/><path d="M12 13l-4-3V8"/><path d="M12 11l4-2V7"/><circle cx="12" cy="18" r="2.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 </svg>
 
 <header class="panel-bar">
-  <div class="brand"><svg class="i"><use href="#i-logo"/></svg><span>Spektra</span></div>
-
-  <div class="device">
-    <span class="led" id="led"></span><span id="devInfo">Not connected</span>
-  </div>
-  <div class="group">
-    <button id="connectBtn" class="btn primary"><svg class="i"><use href="#i-usb"/></svg><span id="connectLabel">Connect HDX</span></button>
-  </div>
-
-  <div class="vr"></div>
-
-  <div class="group">
-    <button id="acqBtn" class="btn">Acquire</button>
-    <button id="liveBtn" class="btn primary live">
-      <svg class="i i-play"><use href="#i-play"/></svg><svg class="i i-stop"><use href="#i-stop"/></svg><span id="liveLabel">Live</span>
-    </button>
-  </div>
-
-  <div class="vr"></div>
-
-  <div class="group" title="Integration time of one scan">
-    <span class="label">Exposure</span>
-    <div class="stepper">
-      <button id="intDown" title="Shorter" aria-label="Shorter exposure"><svg class="i"><use href="#i-minus"/></svg></button>
-      <input id="intInput" type="text" inputmode="decimal" value="100" aria-label="Exposure in ms">
-      <span class="unit">ms</span>
-      <button id="intUp" title="Longer" aria-label="Longer exposure"><svg class="i"><use href="#i-plus"/></svg></button>
+  <!-- Left: the instrument; centre: measuring; right: getting data out -->
+  <div class="bar-zone bar-left">
+    <div class="brand"><svg class="i"><use href="#i-logo"/></svg><span>Spektra</span></div>
+    <div class="vr"></div>
+    <!-- Connection: a status pill; connected, it holds the device and its own disconnect button -->
+    <div class="conn" id="conn">
+      <span class="led" id="led"></span><span id="devInfo">No device</span>
+      <span class="sim-badge" id="simBadge" hidden title="Development mode (?mock): a simulated HDX replaces the USB device">SIMULATED</span>
+      <button class="conn-x" id="disconnectBtn" hidden title="Disconnect the HDX" aria-label="Disconnect the HDX"><svg class="i"><use href="#i-unplug"/></svg></button>
     </div>
-    <label class="switch" title="Adjust the exposure so the highest peak sits near 80 % of full scale">
-      <input type="checkbox" id="autoInt"><span></span>Auto
-    </label>
+    <button id="connectBtn" class="btn primary"><svg class="i"><use href="#i-plug"/></svg>Connect HDX</button>
   </div>
 
-  <div class="spacer"></div>
-  <span class="mono" id="scanInfo"></span>
-  <button class="btn" id="exportBtn" popovertarget="exportPop"><svg class="i"><use href="#i-dl"/></svg>Export<svg class="i"><use href="#i-down"/></svg></button>
-  <a class="btn ghost icon" href="https://github.com/berameric" target="_blank" rel="noopener" title="berameric on GitHub" aria-label="berameric on GitHub"><svg class="i"><use href="#i-github"/></svg></a>
-  <button class="btn ghost icon" id="themeBtn" title="Light / dark theme" aria-label="Toggle light or dark theme"><svg class="i"><use href="#i-theme"/></svg></button>
+  <div class="bar-zone bar-center" role="group" aria-label="Measurement">
+    <div class="group">
+      <button id="acqBtn" class="btn" title="Take a single spectrum"><svg class="i"><use href="#i-camera"/></svg>Acquire</button>
+      <button id="liveBtn" class="btn primary live">
+        <svg class="i i-play"><use href="#i-play"/></svg><svg class="i i-stop"><use href="#i-stop"/></svg><span id="liveLabel">Live</span>
+      </button>
+    </div>
+
+    <div class="vr"></div>
+
+    <div class="expo" id="expGroup" role="group" aria-label="Exposure">
+      <span class="label">Exposure</span>
+      <div class="expo-box" id="expoBox" title="Integration time of one scan. Type a value (e.g. 250 or 1.5 s), scroll over it or use ↑ ↓.">
+        <button class="expo-step" id="intDown" aria-label="Shorter exposure"><svg class="i"><use href="#i-minus"/></svg></button>
+        <label class="expo-val"><input id="intInput" type="text" inputmode="decimal" value="100" autocomplete="off" spellcheck="false" aria-label="Exposure"><span id="intUnit">ms</span></label>
+        <button class="expo-step" id="intUp" aria-label="Longer exposure"><svg class="i"><use href="#i-plus"/></svg></button>
+        <label class="switch expo-auto" title="Auto exposure: the exposure is set for you so the signal stays Good (strongest peak at 60–90 % of full scale).">
+          <input type="checkbox" id="autoInt"><span></span>Auto
+        </label>
+      </div>
+    </div>
+
+    <div class="vr"></div>
+
+    <div class="sig" id="meter" tabindex="0" aria-describedby="sigTip">
+      <span class="label">Signal</span>
+      <span class="sig-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <b id="meterText">No data</b>
+      <span class="mono sig-pct" id="meterPct"></span>
+      <div class="sig-tip" id="sigTip" role="tooltip">
+        <p>How full the detector is at the strongest peak, as a share of full scale (65 535 counts).</p>
+        <ul id="sigLevels">
+          <li data-l="low"><i></i><b>Low</b><span>under 20 % · lengthen the exposure</span></li>
+          <li data-l="fair"><i></i><b>Fair</b><span>20–60 % · usable, more is better</span></li>
+          <li data-l="good"><i></i><b>Good</b><span>60–90 % · the target</span></li>
+          <li data-l="high"><i></i><b>High</b><span>over 90 % · close to clipping</span></li>
+          <li data-l="sat"><i></i><b>Saturated</b><span>clipped · shorten the exposure or turn on Auto</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar-zone bar-right">
+    <button class="btn" id="exportBtn" popovertarget="exportPop"><svg class="i"><use href="#i-dl"/></svg>Export<svg class="i"><use href="#i-down"/></svg></button>
+  </div>
 </header>
 
 <main class="work">
   <section class="plot-pane" aria-label="Spectrum">
     <div class="pane-head">
-      <span class="mono" id="cursorRo"></span>
+      <div class="seg" id="unitSeg" role="group" aria-label="X axis"><button data-unit="nm" class="on">nm</button><button data-unit="eV">eV</button></div>
+      <span class="vr"></span>
+      <span class="opt" id="jacobianSw" hidden>
+        <label class="switch"><input type="checkbox" id="jacobianChk" checked><span></span>Jacobian</label>
+        <button class="tip-btn" aria-label="About the Jacobian conversion"
+          data-tip="Converts counts per pixel into counts per meV: I(E) = I(λ)·λ²/hc. Without it, broad bands look shifted and too narrow on the energy axis. Keep it on for peak positions, widths and areas in eV."><svg class="i"><use href="#i-help"/></svg></button>
+      </span>
+      <span class="opt">
+        <label class="switch"><input type="checkbox" id="autoY" checked><span></span>Auto Y</label>
+        <button class="tip-btn" aria-label="About Auto Y"
+          data-tip="On: the intensity axis follows the spectrum in the visible range. Off: the axis stays where it is, so spectra can be compared at the same scale."><svg class="i"><use href="#i-help"/></svg></button>
+      </span>
+      <span class="opt">
+        <label class="switch"><input type="checkbox" id="logY"><span></span>Log</label>
+        <button class="tip-btn" aria-label="About the log scale"
+          data-tip="Logarithmic intensity axis (L): weak lines stay visible next to strong ones. Values below 1 count are drawn at 1."><svg class="i"><use href="#i-help"/></svg></button>
+      </span>
       <div class="spacer"></div>
+      <span class="mono" id="cursorRo"></span>
+      <span class="mono" id="scanInfo"></span>
       <span class="badge" id="satBadge" hidden>SATURATED</span>
       <span class="sel-chip" id="selChip" hidden>
         <span class="mono" id="selText"></span>
+        <button id="selZoom" title="Zoom to the selection" aria-label="Zoom to the selection"><svg class="i"><use href="#i-zoom"/></svg></button>
         <button id="selClear" title="Clear selection (Esc)" aria-label="Clear selection"><svg class="i"><use href="#i-x"/></svg></button>
       </span>
+      <button class="btn ghost small hold" id="holdBtn" title="Hold this spectrum as a dashed reference curve (H)"><svg class="i"><use href="#i-pin"/></svg><span id="holdLabel">Hold</span></button>
       <button class="btn ghost small icon" popovertarget="helpPop" title="Plot controls" aria-label="Plot controls"><svg class="i"><use href="#i-help"/></svg></button>
       <button class="btn ghost small icon" id="resetView" title="Reset view (double-click)" aria-label="Reset view"><svg class="i"><use href="#i-reset"/></svg></button>
     </div>
-    <div class="plot-wrap">
+    <div class="plot-wrap" id="plotWrap">
       <div id="plot" class="plot"></div>
+      <div class="overview" id="overview" hidden><canvas id="ovCanvas" title="Drag the window to move the view"></canvas></div>
       <div class="plot-empty" id="plotEmpty">
-        <div>
-          <b>No spectrum yet</b>
-          <p>Plug in the HDX, press Connect HDX and then Live.</p>
+        <p class="empty-note" id="emptyNote" hidden><b>No spectrum yet</b>Connect the HDX, then press Live or Acquire.</p>
+        <div class="guide" id="guide">
+          <div class="guide-head">
+            <b>Getting started</b>
+            <button class="btn ghost small icon" id="guideClose" title="Close — the steps are optional" aria-label="Close getting started"><svg class="i"><use href="#i-x"/></svg></button>
+          </div>
+          <ol id="guideSteps">
+            <li data-step="connect">
+              <span class="gs-mark"><svg class="i"><use href="#i-check"/></svg></span>
+              <span class="gs-text">Connect the HDX<small id="guideConnectText">Plug it in over USB and choose it in the browser’s dialog.</small></span>
+              <button class="btn small" data-act="connect">Connect</button>
+            </li>
+            <li data-step="dark">
+              <span class="gs-mark"><svg class="i"><use href="#i-check"/></svg></span>
+              <span class="gs-text">Take a dark<small>Block the light once; the detector background is then removed. Recommended.</small></span>
+              <button class="btn small" data-act="dark">Take dark…</button>
+            </li>
+            <li data-step="live">
+              <span class="gs-mark"><svg class="i"><use href="#i-check"/></svg></span>
+              <span class="gs-text">Start measuring<small>Live updates continuously; Acquire takes a single spectrum.</small></span>
+              <button class="btn small" data-act="live">Live</button>
+            </li>
+          </ol>
         </div>
+      </div>
+      <div class="hint" id="plotHint" hidden>
+        <span><b>Drag</b> across a range to search peaks only there</span>
+        <span><b>Click</b> a peak to select all of it</span>
+        <span><b>Wheel</b> zooms · <b>double-click</b> resets</span>
+        <button class="btn ghost small" id="hintClose">Got it</button>
       </div>
     </div>
   </section>
 
-  <aside class="rail" aria-label="Peaks">
-    <div class="pane-head">
-      <h2>Peaks</h2><span class="count" id="peakCount">0</span>
-      <div class="spacer"></div>
-      <label class="switch"><input type="checkbox" id="detectChk"><span></span>Detect</label>
+  <aside class="rail" id="rail" aria-label="Peaks">
+    <div class="rail-resize" id="railResize" title="Drag to resize · double-click for the default width"></div>
+    <button class="rail-strip" id="railExpand" title="Show the peaks panel (P)" aria-label="Show the peaks panel">
+      <svg class="i"><use href="#i-panel-open"/></svg><span class="count" id="peakCountStrip">0</span><span class="strip-label">Peaks</span>
+    </button>
+    <div class="rail-body">
+      <div class="pane-head">
+        <h2>Peaks</h2><span class="count" id="peakCount">0</span>
+        <div class="spacer"></div>
+        <label class="switch" title="Find every peak above the noise automatically"><input type="checkbox" id="detectChk" checked><span></span>Detect</label>
+        <button class="btn ghost small icon" id="peaksCopy" title="Copy the table — paste it into a spreadsheet" aria-label="Copy the peak table"><svg class="i"><use href="#i-copy"/></svg></button>
+        <button class="btn ghost small icon" id="railCollapse" title="Hide the peaks panel (P)" aria-label="Hide the peaks panel"><svg class="i"><use href="#i-panel-close"/></svg></button>
+      </div>
+      <div class="scope" id="detectScope" hidden></div>
+      <div class="peak-wrap" id="peakWrap">
+        <table class="peak-table">
+          <thead><tr>
+            <th class="c-n"><button data-sort="n">#</button></th>
+            <th class="c-pos"><button data-sort="pos">Position <small id="uPos">nm</small></button></th>
+            <th class="c-ext"><button data-sort="pos">Also <small id="uAlt">eV</small></button></th>
+            <th><button data-sort="fwhm">FWHM <small id="uFwhm">nm</small></button></th>
+            <th class="c-h"><button data-sort="height">Height <small id="uHeight">cts</small></button></th>
+            <th class="c-ext"><button data-sort="height" title="Height relative to the strongest peak">Rel.</button></th>
+            <th><button data-sort="area" title="Integrated intensity within ±1.5 FWHM">Area</button></th>
+            <th><button data-sort="snr" title="Signal-to-noise ratio">SNR</button></th>
+          </tr></thead>
+          <tbody id="peakList"></tbody>
+        </table>
+      </div>
+      <div class="rail-empty" id="peakEmpty"></div>
+      <p class="rail-foot" id="peakFoot" hidden>Click a row to zoom to the peak · click again to reset</p>
     </div>
-    <div class="scope" id="detectScope" hidden></div>
-    <ol class="peak-list" id="peakList"></ol>
-    <div class="rail-empty" id="peakEmpty"></div>
   </aside>
 </main>
 
-<footer class="chain" aria-label="Signal chain">
-  <span class="label">Signal chain</span>
-  <button class="stage" popovertarget="avgPop"><span class="k">Average</span><span class="v" id="avgStage">1 scan</span></button>
+<footer class="chain" aria-label="Processing">
+  <span class="label">Processing</span>
+  <button class="stage" popovertarget="avgPop" title="Average several scans into one spectrum"><span class="k">Averaging</span><span class="v" id="avgStage">1 scan</span><svg class="i caret"><use href="#i-down"/></svg></button>
   <svg class="i"><use href="#i-chev"/></svg>
-  <button class="stage" popovertarget="darkPop"><span class="dot" id="darkDot"></span><span class="k">Dark</span><span class="v" id="darkStage">none</span></button>
+  <button class="stage" id="darkStageBtn" popovertarget="darkPop" title="Detector background subtraction"><span class="dot" id="darkDot"></span><span class="k">Dark</span><span class="v" id="darkStage">none</span><svg class="i caret"><use href="#i-down"/></svg></button>
   <svg class="i"><use href="#i-chev"/></svg>
-  <button class="stage" popovertarget="boxcarPop"><span class="k">Boxcar</span><span class="v" id="boxcarStage">off</span></button>
-  <svg class="i"><use href="#i-chev"/></svg>
-  <button class="stage" popovertarget="displayPop"><span class="k">Display</span><span class="v" id="displayStage">nm · auto Y</span></button>
+  <button class="stage" popovertarget="boxcarPop" title="Boxcar smoothing over neighbouring pixels"><span class="k">Smoothing</span><span class="v" id="boxcarStage">off</span><svg class="i caret"><use href="#i-down"/></svg></button>
+  <div class="spacer"></div>
+  <span class="mono chain-sum" id="chainSum"></span>
+  <span class="vr"></span>
+  <a class="foot-link" href="https://github.com/berameric/spektra" target="_blank" rel="noopener" title="Spektra on GitHub"><svg class="i"><use href="#i-github"/></svg>GitHub</a>
 </footer>
 
 <!-- signal-chain editors -->
 <div popover class="pop" id="avgPop">
-  <h3>Average</h3>
+  <h3>Averaging</h3>
   <div class="row"><span class="label">Scans per spectrum</span><input id="avgInput" type="number" min="1" max="1000" value="1"></div>
   <div class="presets" data-for="avgInput"><button>1</button><button>5</button><button>10</button><button>25</button><button>100</button></div>
-  <p>Mean of several scans. Less noise, slower update.</p>
+  <p>Each spectrum is the mean of several scans: noise falls with √N, updates get slower.</p>
+  <p class="pop-calc mono" id="avgInfo"></p>
 </div>
 <div popover class="pop" id="darkPop">
   <h3>Dark background</h3>
+  <p class="pop-lead">Even in darkness the detector reads a background of counts. Measure it once at the current exposure and it is subtracted from every spectrum.</p>
   <div class="row"><span class="label">Scans to average</span><input id="darkAvg" type="number" min="1" max="500" value="10"></div>
   <div class="row">
     <button id="darkBtn" class="btn primary small">Take dark…</button>
@@ -131,23 +234,16 @@
   <div id="darkStatus" class="status-line"></div>
 </div>
 <div popover class="pop" id="boxcarPop">
-  <h3>Boxcar smoothing</h3>
+  <h3>Smoothing (boxcar)</h3>
   <div class="row"><span class="label">Half width</span><span><input id="boxcarInput" type="number" min="0" max="50" value="0"> <span class="label">px</span></span></div>
   <div class="presets" data-for="boxcarInput"><button>0</button><button>1</button><button>2</button><button>3</button><button>5</button></div>
-  <p>Each pixel becomes the mean of its neighbours. 0 turns it off. Broadens narrow lines.</p>
-</div>
-<div popover class="pop" id="displayPop">
-  <h3>Display</h3>
-  <div class="row"><span class="label">X axis</span>
-    <div class="seg" id="unitSeg"><button data-unit="nm" class="on">nm</button><button data-unit="eV">eV</button></div>
-  </div>
-  <div class="row" id="jacobianRow" hidden><label class="switch"><input type="checkbox" id="jacobianChk" checked><span></span>Jacobian conversion</label></div>
-  <p id="jacobianNote" hidden>Intensity per meV: I(E) = I(λ)·λ²/hc, after removing the constant detector offset. Peak positions, widths and areas are measured on this spectrum.</p>
-  <div class="row"><label class="switch"><input type="checkbox" id="autoY" checked><span></span>Auto-scale Y</label></div>
+  <p>Each pixel becomes the mean of its neighbours: less noise, but lines narrower than the window get wider.</p>
+  <p class="pop-calc mono" id="boxcarInfo"></p>
 </div>
 <div popover class="pop menu" id="exportPop">
   <button id="csvBtn"><svg class="i"><use href="#i-dl"/></svg><span>Spectrum<small>Every pixel: wavelength, energy, counts, counts/meV</small></span></button>
   <button id="peaksCsvBtn"><svg class="i"><use href="#i-dl"/></svg><span>Peaks<small>The detected peaks in the list</small></span></button>
+  <button id="pngBtn"><svg class="i"><use href="#i-image"/></svg><span>Plot image<small>The plot as you see it, as PNG</small></span></button>
 </div>
 <div popover class="pop help" id="helpPop">
   <h3>Plot controls</h3>
@@ -160,7 +256,19 @@
     <dt>Shift + drag</dt><dd>Pan</dd>
     <dt>Double-click</dt><dd>Reset the view</dd>
   </dl>
-  <button class="btn small" id="envOpen" style="margin-top:12px">System check…</button>
+  <h3 class="help-sub">Keys</h3>
+  <dl>
+    <dt>Space</dt><dd>Start or stop Live</dd>
+    <dt>A</dt><dd>Acquire one spectrum</dd>
+    <dt>R</dt><dd>Reset the view</dd>
+    <dt>H</dt><dd>Hold or clear the reference</dd>
+    <dt>L</dt><dd>Log intensity axis</dd>
+    <dt>P</dt><dd>Show or hide the peaks panel</dd>
+  </dl>
+  <div class="help-actions">
+    <button class="btn small" id="guideOpen">Getting started</button>
+    <button class="btn small" id="envOpen">System check…</button>
+  </div>
 </div>
 
 <dialog id="dlg">
@@ -175,10 +283,10 @@
     <h3 id="envTitle">Before you connect</h3>
     <p class="env-system">Detected: <b id="envSystem"></b></p>
     <ul class="env-list" id="envList"></ul>
-    <div class="actions">
+    <div class="actions" id="envActions">
       <label class="switch" id="envHideRow"><input type="checkbox" id="envHide"><span></span>Don’t show again on this computer</label>
       <div class="spacer"></div>
-      <button value="ok" class="btn primary" autofocus>OK</button>
+      <button value="ok" class="btn primary" id="envOk" autofocus>OK</button>
     </div>
   </form>
 </dialog>

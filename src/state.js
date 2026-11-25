@@ -10,11 +10,17 @@ export const S = {
   frame: null, // {wl, raw, inten, rawMax, meta}
   disp: null,  // {x, y} in the display unit, x ascending
   sel: null,   // selected range {lo, hi} in nm; never stored
-  detect: false,
+  detect: true,
   jacobian: true, // on the eV axis: counts per meV (I·λ²/hc) instead of counts per pixel
   peaks: [],    // detected peaks, ascending wavelength
   mainPeak: -1, // index of the strongest detected peak
+  hoverPeak: -1, // peak under the pointer, in the table or on the plot
+  focusPeak: -1, // peak whose row was clicked: the plot is zoomed to it
+  peakSort: { key: "n", dir: 1 }, // table order
   yRange: null,
+  logY: false,
+  ref: null,     // held reference spectrum {wl, inten, time}, drawn under the live one
+  refDisp: null, // the reference in the display unit
 };
 
 export const toDisp = (nm) => (S.unit === "eV" ? nmToEv(nm) : nm);

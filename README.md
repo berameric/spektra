@@ -59,15 +59,18 @@ context (`https://` or `http://localhost`).
 No build step; the repository root is the site.
 
 ```bash
-npm start    # serves http://localhost:8000
+npm start    # serves http://localhost:8000 (no caching, so edits always load)
 npm test     # Node 18+
 ```
+
+Without an instrument, open **http://localhost:8000/?mock**: a simulated HDX (mercury lines and a broad
+emission band) replaces the USB device. It is available on `localhost` only.
 
 ## Author
 
 [Bilal Bera Meriç](https://github.com/berameric) — Nano Optoelectronics Laboratories, Istanbul University.
 
-Plotting by [uPlot](https://github.com/leeoniya/uPlot) (MIT).
+Plotting by [uPlot](https://github.com/leeoniya/uPlot) (MIT); icons from [Lucide](https://lucide.dev) (ISC).
 
 ## License
 

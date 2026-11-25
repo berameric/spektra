@@ -1,11 +1,11 @@
 // Instrument actions: connect, single and live acquisition, exposure (manual and auto) and dark measurement.
 
 import { boxcar, estimateBaseline } from "./analysis/peaks.js";
-import { AUTO_INT_BAND, AUTO_INT_TARGET, MAX_INT_MS, MIN_INT_MS, SATURATION } from "./config.js";
+import { AUTO_INT_BAND, AUTO_INT_TARGET, MAX_INT_MS, MIN_INT_MS, MOCK, SATURATION } from "./config.js";
 import { HDXUSB } from "./device/hdx-usb.js";
 import { requestRender, showFrame } from "./spectrum.js";
 import { S, darkActive } from "./state.js";
-import { setDarkStatus, updateUi } from "./ui/controls.js";
+import { setDarkStatus, showExposure, updateUi } from "./ui/controls.js";
 import { confirmDialog, toast, toastShowing } from "./ui/notify.js";
 import { $, clamp } from "./util.js";
 
@@ -61,9 +61,14 @@ export async function connect() {
   S.busy = true;
   updateUi();
   try {
-    // A single HDX the browser already has permission for opens without the chooser
-    const known = (await navigator.usb.getDevices()).filter(HDXUSB.isHDX);
-    const dev = known.length === 1 ? await HDXUSB.open(known[0]) : await HDXUSB.request();
+    let dev;
+    if (MOCK) {
+      dev = await (await import("./device/mock-hdx.js")).MockHDX.open();
+    } else {
+      // A single HDX the browser already has permission for opens without the chooser
+      const known = (await navigator.usb.getDevices()).filter(HDXUSB.isHDX);
+      dev = known.length === 1 ? await HDXUSB.open(known[0]) : await HDXUSB.request();
+    }
     S.wl = await dev.wavelengths();
     await dev.setIntegrationUs(S.intMs * 1000);
     S.dev = dev;
@@ -165,7 +170,7 @@ export async function applyIntegration(ms, auto = false) {
   ms = clamp(Math.round(ms * 1000) / 1000, MIN_INT_MS, MAX_INT_MS);
   const changed = ms !== S.intMs;
   S.intMs = ms;
-  $("intInput").value = String(ms);
+  showExposure(true);
   S.yRange = null;
   if (S.dev) {
     try {
@@ -190,6 +195,7 @@ export async function takeDark() {
   S.busy = true;
   S.measuringDark = true;
   updateUi();
+  dev.simulateShutter?.(true); // simulated HDX only: the user cannot block its light
   try {
     const sum = new Float64Array(S.wl.length);
     for (let k = 0; k < n; k++) {
@@ -203,6 +209,7 @@ export async function takeDark() {
   } catch (e) {
     toast(`Dark failed: ${e.message}`, "bad");
   } finally {
+    dev.simulateShutter?.(false);
     S.busy = false;
     S.measuringDark = false;
     updateUi();
