@@ -37,6 +37,7 @@ install: the repository root is the site (GitHub Pages serves `main` as is).
 | `src/ui/` | One module per surface: `plot`, `plot-overlays`, `overview`, `peaks`, `rail`, `controls`, `notify`, `environment`, `hints` |
 | `src/styles/spektra.css` | All styles; design tokens on `:root` |
 | `tests/` | Node tests, no dependencies |
+| `docs/PROTOCOL.md` | How the driver speaks to the instrument; keep it in step with `hdx-usb.js` |
 
 Keep this shape: a new feature gets its own module rather than growing `main.js`. Avoid import cycles;
 pass callbacks (as `initPlot(handlers)` does) when a lower module must reach a higher one.

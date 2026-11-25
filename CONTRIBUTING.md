@@ -20,7 +20,8 @@ What differs per model:
 | Pixel format / full scale | 16-bit, 65 535 counts |
 | Integration time limits | 6 ms – 10 s |
 
-Supporting such a model should mostly mean turning these constants into a per-model profile.
+Supporting such a model should mostly mean turning these constants into a per-model profile. The message
+format and the request–reply handling are documented in [docs/PROTOCOL.md](docs/PROTOCOL.md).
 
 **Older models using the legacy single-byte command protocol** (for example the USB2000+, USB4000 or
 HR4000 families) need a separate driver with the same interface as `HDXUSB`
