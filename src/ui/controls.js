@@ -179,6 +179,13 @@ export function initPopovers() {
       opener?.setAttribute("aria-expanded", String(open));
       if (!open || !opener) return;
       const r = opener.getBoundingClientRect();
+      if (opener.closest(".chain") && document.documentElement.classList.contains("compact")) {
+        // Phones: processing is a strip on the left, so its editors open to the right of it
+        pop.style.left = `${r.right + 8}px`;
+        pop.style.bottom = "auto";
+        pop.style.top = `${clamp(r.top, 8, innerHeight - pop.offsetHeight - 8)}px`;
+        return;
+      }
       pop.style.left = `${clamp(r.left, 8, innerWidth - pop.offsetWidth - 8)}px`;
       if (r.top > innerHeight / 2) {
         pop.style.top = "auto";
