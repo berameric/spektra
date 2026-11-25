@@ -45,4 +45,11 @@ That is already enough to start a profile, and someone with the hardware is need
 2. `npm test` runs the analysis and driver tests (Node 18+, no packages to install).
 3. Keep pull requests focused: one model or one feature at a time, and say which hardware you tested on.
 
+## Working with AI coding assistants
+
+AI-assisted contributions are welcome. Point your assistant at [AGENTS.md](AGENTS.md): it lists the
+project's rules (no build step or dependencies, plain JavaScript modules, the dark design tokens, where
+things live) and the pitfalls already met. You remain responsible for the change: read the diff, run the
+tests, try it with `?mock`, and say in the pull request what was tested on real hardware.
+
 Spektra is MIT licensed; by contributing you agree that your contribution is released under the same licence.
