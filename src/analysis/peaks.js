@@ -198,6 +198,7 @@ export function findSpectralPeaks(wavelength, intensity, {
       energyEv: nmToEv(m.center),
       fwhmNm: m.hi - m.lo,
       fwhmEv: m.lo > 0 && m.hi > 0 ? Math.abs(nmToEv(m.lo) - nmToEv(m.hi)) : NaN,
+      loNm: m.lo, hiNm: m.hi, // half-maximum crossings
       peakIntensity: m.height,
       rawIntensity: m.value,
       integratedIntensity: m.area,
@@ -273,6 +274,7 @@ export function findEnergyPeaks(wavelength, intensity, options = {}) {
       energyEv: m.center,
       fwhmNm: m.lo > 0 && m.hi > 0 ? Math.abs(evToNm(m.lo) - evToNm(m.hi)) : NaN,
       fwhmEv: m.hi - m.lo,
+      loNm: evToNm(m.hi), hiNm: evToNm(m.lo), // half-maximum crossings
       peakIntensity: m.height,
       rawIntensity: m.value,
       integratedIntensity: 1000 * m.area, // (counts/meV) x eV -> counts
