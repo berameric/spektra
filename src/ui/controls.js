@@ -86,6 +86,8 @@ export function setDarkStatus(text, kind, short) {
   el.textContent = text;
   el.className = `status-line ${kind}`;
   $("darkStage").textContent = short;
+  // Phone strip: one short word under the icon
+  $("darkShort").textContent = { none: "—", subtracted: "on" }[short] ?? short.replace("measuring ", "");
   $("darkDot").className = `dot ${kind}`;
 }
 
@@ -148,6 +150,8 @@ const fmtMs = (ms) => (ms >= 1000 ? `${(ms / 1000).toFixed(ms >= 10000 ? 0 : 1)}
 export function updateChain() {
   $("avgStage").textContent = S.avg === 1 ? "1 scan" : `${S.avg} scans`;
   $("boxcarStage").textContent = S.boxcar ? `±${S.boxcar} px` : "off";
+  $("avgShort").textContent = `${S.avg}×`;
+  $("boxcarShort").textContent = S.boxcar ? `±${S.boxcar}` : "off";
   $("jacobianSw").hidden = S.unit !== "eV";
   $("chainSum").textContent = `1 spectrum / ${fmtMs(S.avg * S.intMs)}`;
 

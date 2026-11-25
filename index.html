@@ -35,6 +35,9 @@
   <symbol id="i-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></symbol>
   <symbol id="i-minimize" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></symbol>
   <symbol id="i-rotate" viewBox="0 0 24 24"><rect width="12" height="20" x="6" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-waves" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></symbol>
   <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
@@ -218,11 +221,11 @@
 
 <footer class="chain" aria-label="Processing">
   <span class="label">Processing</span>
-  <button class="stage" popovertarget="avgPop" title="Average several scans into one spectrum"><span class="k">Averaging</span><span class="v" id="avgStage">1 scan</span><svg class="i caret"><use href="#i-down"/></svg></button>
+  <button class="stage" popovertarget="avgPop" title="Average several scans into one spectrum" aria-label="Averaging"><svg class="i st-ico"><use href="#i-layers"/></svg><span class="st-short mono" id="avgShort">1×</span><span class="k">Averaging</span><span class="v" id="avgStage">1 scan</span><svg class="i caret"><use href="#i-down"/></svg></button>
   <svg class="i"><use href="#i-chev"/></svg>
-  <button class="stage" id="darkStageBtn" popovertarget="darkPop" title="Detector background subtraction"><span class="dot" id="darkDot"></span><span class="k">Dark</span><span class="v" id="darkStage">none</span><svg class="i caret"><use href="#i-down"/></svg></button>
+  <button class="stage" id="darkStageBtn" popovertarget="darkPop" title="Detector background subtraction" aria-label="Dark background"><span class="dot" id="darkDot"></span><svg class="i st-ico"><use href="#i-moon"/></svg><span class="st-short mono" id="darkShort">—</span><span class="k">Dark</span><span class="v" id="darkStage">none</span><svg class="i caret"><use href="#i-down"/></svg></button>
   <svg class="i"><use href="#i-chev"/></svg>
-  <button class="stage" popovertarget="boxcarPop" title="Boxcar smoothing over neighbouring pixels"><span class="k">Smoothing</span><span class="v" id="boxcarStage">off</span><svg class="i caret"><use href="#i-down"/></svg></button>
+  <button class="stage" popovertarget="boxcarPop" title="Boxcar smoothing over neighbouring pixels" aria-label="Smoothing"><svg class="i st-ico"><use href="#i-waves"/></svg><span class="st-short mono" id="boxcarShort">off</span><span class="k">Smoothing</span><span class="v" id="boxcarStage">off</span><svg class="i caret"><use href="#i-down"/></svg></button>
   <div class="spacer"></div>
   <span class="mono chain-sum" id="chainSum"></span>
   <span class="vr"></span>

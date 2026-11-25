@@ -526,7 +526,7 @@ html.compact body { height: 100dvh; overflow: hidden; padding: 0 env(safe-area-i
 .compact .guide { padding: 12px 14px 8px; max-height: 100%; overflow: auto; }
 .compact .guide li { padding: 6px 0; }
 /* Processing moves to a strip on the left, mirroring the peaks strip on the right: the plot keeps the height */
-html.compact body { grid-template-columns: 66px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+html.compact body { grid-template-columns: 58px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
 .compact .panel-bar { grid-column: 1 / -1; }
 .compact .work { grid-column: 2; grid-row: 2; }
 .compact .chain {
@@ -535,10 +535,12 @@ html.compact body { grid-template-columns: 66px minmax(0, 1fr); grid-template-ro
 }
 .compact .chain .label, .compact .chain-sum, .compact .chain > .vr, .compact .foot-link, .compact .chain .spacer { display: none; }
 .compact .chain > svg.i { align-self: center; width: 12px; height: 12px; transform: rotate(90deg); }
-.compact .stage { position: relative; flex-direction: column; gap: 1px; height: auto; padding: 7px 2px; }
-.compact .stage .k { font-size: 9.5px; letter-spacing: -.01em; }
-.compact .stage .v { font-size: 10.5px; }
-.compact .stage .caret { display: none; }
+/* Phone strip tiles: an icon and a short value; the full name is the tile's label and the editor's title */
+.stage .st-ico, .stage .st-short { display: none; }
+.compact .stage { position: relative; flex-direction: column; gap: 4px; height: auto; padding: 9px 2px 7px; }
+.compact .stage .k, .compact .stage .v, .compact .stage .caret { display: none; }
+.compact .stage .st-ico { display: block; width: 18px; height: 18px; color: var(--text); }
+.compact .stage .st-short { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: 11px; font-weight: 500; color: var(--muted); }
 .compact .stage .dot { position: absolute; top: 5px; right: 5px; }
 .compact #toasts { bottom: 10px; gap: 4px; }
 .compact .toast { padding: 6px 11px; font-size: 12px; border-radius: 8px; gap: 8px; max-width: min(420px, calc(100vw - 32px)); }
