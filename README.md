@@ -74,6 +74,13 @@ npm test     # Node 18+
 Without an instrument, open **http://localhost:8000/?mock**: a simulated HDX (mercury lines and a broad
 emission band) replaces the USB device. It is available on `localhost` only.
 
+## Other spectrometers
+
+Spektra is tested with the HDX only. Other Ocean Insight models, especially the newer ones that speak the
+same Ocean Binary Protocol, should need little more than a per-model profile in the USB driver — but we
+cannot test them without the hardware. **If you have one, contributions and test reports are very
+welcome;** see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Author
 
 [Bilal Bera Meriç](https://github.com/berameric) — Nano Optoelectronics Laboratories, Istanbul University.
