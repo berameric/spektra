@@ -1,0 +1,65 @@
+// Simulated HDX for development: same interface as HDXUSB, no hardware needed.
+// Enabled only on localhost with ?mock in the address (see MOCK in config.js); never loaded otherwise.
+//
+// The "lamp" is a mercury pen-lamp line set plus a broad photoluminescence band. Counts scale with the
+// exposure, carry shot and read noise, sit on a detector offset and clip at 65 535 like the real detector.
+
+const PIXELS = 2068;
+const FULL_SCALE = 65535;
+// [centre nm, sigma nm, counts per ms of exposure]
+const LINES = [
+  [404.66, 0.8, 90], [435.83, 0.8, 240], [546.07, 0.85, 350], [576.96, 0.9, 70], [579.07, 0.9, 75],
+  [620, 21, 120], // broad emission band, FWHM ≈ 50 nm
+];
+const OFFSET = 1500, DARK_PER_MS = 0.4, READ_NOISE = 6;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const gauss = () => Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
+
+export class MockHDX {
+  static async open() {
+    await sleep(300);
+    return new MockHDX();
+  }
+
+  constructor() {
+    this.model = "HDX";
+    this.serialNumber = "MOCK0001";
+    this.intUs = 100000;
+    this.shutterClosed = false;
+    // Fixed per-pixel offset pattern and a slightly non-linear wavelength calibration, like a real unit
+    this.wl = Float64Array.from({ length: PIXELS }, (_, i) => 199.6 + 0.4378 * i - 1.2e-6 * i * i);
+    this.pattern = Float64Array.from({ length: PIXELS }, () => 4 * gauss());
+    this.t0 = performance.now();
+  }
+
+  async wavelengths() { return Float64Array.from(this.wl); }
+
+  async setIntegrationUs(us) { this.intUs = us; }
+
+  /** Dark measurements call this so the simulated light is blocked while they run. */
+  simulateShutter(closed) { this.shutterClosed = closed; }
+
+  async intensities() {
+    const ms = this.intUs / 1000;
+    await sleep(Math.max(ms, 15));
+    const drift = 1 + 0.03 * Math.sin((performance.now() - this.t0) / 4000); // slow lamp drift
+    const out = new Uint16Array(PIXELS);
+    for (let i = 0; i < PIXELS; i++) {
+      const x = this.wl[i];
+      let light = 0;
+      if (!this.shutterClosed) {
+        for (const [c, s, rate] of LINES) {
+          const d = (x - c) / s;
+          if (d * d < 60) light += rate * ms * drift * Math.exp(-0.5 * d * d);
+        }
+      }
+      const signal = light + DARK_PER_MS * ms;
+      const v = OFFSET + this.pattern[i] + signal + Math.sqrt(signal + READ_NOISE ** 2) * gauss();
+      out[i] = Math.max(0, Math.min(FULL_SCALE, Math.round(v)));
+    }
+    return out;
+  }
+
+  async close() {}
+}
