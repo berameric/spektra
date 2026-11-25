@@ -2,8 +2,8 @@
 // with clipped pixels, and the peak dots. The highlighted peak (hovered, or clicked in the table) also gets
 // its FWHM drawn at half maximum and a label with its position, width and height.
 
-import { SATURATION, peakColor } from "../config.js";
-import { S, dispRange, fromDisp, perMev, toDisp } from "../state.js";
+import { peakColor } from "../config.js";
+import { S, dispRange, fromDisp, perMev, satLevel, toDisp } from "../state.js";
 import { fmt, withAlpha } from "../util.js";
 
 /** Approximate colour of a wavelength: visible 380–750 nm fading to black at both ends; black outside (UV, IR). */
@@ -90,7 +90,7 @@ function drawSaturation(u, ctx, C, X, Y, pr) {
   const bbox = u.bbox;
   if (!perMev()) {
     // A subtracted dark lowers the level at which the shown spectrum clips
-    let level = SATURATION;
+    let level = satLevel();
     if (meta.darkMs !== null && S.dark) level -= S.dark.reduce((s, v) => s + v, 0) / S.dark.length;
     const ly = Y(level);
     if (ly >= bbox.top && ly <= bbox.top + bbox.height) {
@@ -115,7 +115,7 @@ function drawSaturation(u, ctx, C, X, Y, pr) {
   ctx.beginPath();
   let open = false;
   for (let i = 0; i < raw.length; i++) {
-    if (raw[i] >= SATURATION) {
+    if (raw[i] >= satLevel()) {
       const x = X(toDisp(wl[i])), y = Y(dispY(i));
       if (open) ctx.lineTo(x, y); else { ctx.moveTo(x, y); ctx.lineTo(x + 0.01, y); open = true; }
     } else open = false;

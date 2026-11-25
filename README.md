@@ -83,7 +83,7 @@ and Opera 48+; it is not available in Firefox or Safari.
 
 Spektra does not depend on the manufacturer's driver, SDK or application software. The HDX is controlled with
 the Ocean Binary Protocol (OBP), a framed binary message protocol carried over USB bulk transfers, which
-Spektra implements in JavaScript ([`src/device/hdx-usb.js`](src/device/hdx-usb.js)). The implementation reads the
+Spektra implements in JavaScript ([`src/device/`](src/device/)). The implementation reads the
 serial number and the wavelength calibration stored in the instrument, sets the integration time and acquires
 16-bit spectra of 2 068 pixels. Because over some USB connections (for example through a hub) the
 instrument occasionally loses or repeats a reply, replies are matched to requests by message type and requests
@@ -117,11 +117,14 @@ website. Nothing is sent over the network: measurements remain in the browser un
 
 ## Other instruments
 
-Spektra has been tested with the HDX only. Other Ocean Insight instruments that use OBP are expected to require
-mainly a per-model profile in the USB driver (product ID, pixel count, spectrum message and pixel format,
-integration-time limits). Without access to the hardware these cannot be verified; test reports and
-contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) and Section 7 of
-[docs/PROTOCOL.md](docs/PROTOCOL.md).
+Spektra recognises an Ocean Insight instrument by its USB IDs and selects the driver from a table of
+per-model profiles ([`src/device/profiles.js`](src/device/profiles.js)); no setting has to be entered by hand.
+Only the HDX has been tested. The STS, QE Pro, Spark and Ventana, which use the same protocol, are included
+as experimental entries (parameters from python-seabreeze) and need confirmation on the instruments. Models
+using other protocols (the Ocean ST/SR/HR series and the older single-byte command set) are recognised but
+not yet operated; for these, and for unknown Ocean devices, Spektra produces a report from the USB descriptors
+and offers to open a pre-filled GitHub issue. Test reports and contributions are welcome; see
+[CONTRIBUTING.md](CONTRIBUTING.md) and Section 7 of [docs/PROTOCOL.md](docs/PROTOCOL.md).
 
 ## Development
 

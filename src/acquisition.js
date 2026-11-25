@@ -1,12 +1,13 @@
 // Instrument actions: connect, single and live acquisition, exposure (manual and auto) and dark measurement.
 
 import { boxcar, estimateBaseline } from "./analysis/peaks.js";
-import { AUTO_INT_BAND, AUTO_INT_TARGET, MAX_INT_MS, MIN_INT_MS, MOCK, SATURATION } from "./config.js";
-import { HDXUSB } from "./device/hdx-usb.js";
+import { AUTO_INT_BAND, AUTO_INT_TARGET, MOCK } from "./config.js";
+import { UnsupportedInstrument, connectInstrument, isDeviceOf, usbSupported } from "./device/index.js";
 import { requestRender, showFrame } from "./spectrum.js";
-import { S, darkActive } from "./state.js";
+import { S, darkActive, satLevel } from "./state.js";
 import { setDarkStatus, showExposure, updateUi } from "./ui/controls.js";
 import { confirmDialog, toast, toastShowing } from "./ui/notify.js";
+import { showUnsupported } from "./ui/unsupported.js";
 import { $, clamp } from "./util.js";
 
 /** One spectrum: mean of S.avg scans, dark subtracted when valid, then boxcar smoothed. */
@@ -32,12 +33,12 @@ async function acquireFrame() {
 /** Auto integration: rescale so the highest peak sits near 80 % of full scale. */
 async function autoAdjustIntegration(f) {
   const [base, noise] = estimateBaseline(f.raw);
-  const signal = f.rawMax - base, full = SATURATION - base;
-  if (signal < 20 * noise && f.rawMax < SATURATION) return; // no real signal to scale on
+  const sat = satLevel(), signal = f.rawMax - base, full = sat - base;
+  if (signal < 20 * noise && f.rawMax < sat) return; // no real signal to scale on
   const frac = signal / full;
-  if (f.rawMax < SATURATION && frac >= AUTO_INT_BAND[0] && frac <= AUTO_INT_BAND[1]) return;
-  const ratio = f.rawMax >= SATURATION ? 0.5 : clamp(AUTO_INT_TARGET / frac, 0.1, 10);
-  let next = clamp(S.intMs * ratio, MIN_INT_MS, MAX_INT_MS);
+  if (f.rawMax < sat && frac >= AUTO_INT_BAND[0] && frac <= AUTO_INT_BAND[1]) return;
+  const ratio = f.rawMax >= sat ? 0.5 : clamp(AUTO_INT_TARGET / frac, 0.1, 10);
+  let next = clamp(S.intMs * ratio, ...S.intLimitsMs);
   next = next >= 100 ? Math.round(next) : Math.round(next * 10) / 10;
   if (Math.abs(next - S.intMs) / S.intMs > 0.02) {
     await applyIntegration(next, true);
@@ -49,11 +50,11 @@ function connectErrorText(e) {
   const msg = e?.message || String(e);
   if (e?.name === "SecurityError" || /access denied|unable to claim|failed to open|in use/i.test(msg)) {
     const win = /Windows/.test(navigator.userAgent);
-    return `HDX connection failed: ${msg}. ` + (win
-      ? "On Windows the HDX needs the WinUSB driver (install once with Zadig). Also close other programs using it."
-      : "Close other programs using the HDX. On Linux a udev rule is needed for USB access.");
+    return `Connection failed: ${msg}. ` + (win
+      ? "On Windows the spectrometer needs the WinUSB driver (install once with Zadig). Also close other programs using it."
+      : "Close other programs using the spectrometer. On Linux a udev rule is needed for USB access.");
   }
-  return `HDX connection failed: ${msg}`;
+  return `Connection failed: ${msg}`;
 }
 
 export async function connect() {
@@ -61,22 +62,25 @@ export async function connect() {
   S.busy = true;
   updateUi();
   try {
-    let dev;
-    if (MOCK) {
-      dev = await (await import("./device/mock-hdx.js")).MockHDX.open();
-    } else {
-      // A single HDX the browser already has permission for opens without the chooser
-      const known = (await navigator.usb.getDevices()).filter(HDXUSB.isHDX);
-      dev = known.length === 1 ? await HDXUSB.open(known[0]) : await HDXUSB.request();
-    }
+    const dev = MOCK ? await (await import("./device/mock-hdx.js")).MockHDX.open() : await connectInstrument();
+    // Limits of this instrument; keep the exposure inside them
+    const p = dev.profile;
+    S.fullScale = dev.fullScale;
+    S.intLimitsMs = [p.intMinUs / 1000, p.intMaxUs / 1000];
+    S.intMs = clamp(S.intMs, ...S.intLimitsMs);
     S.wl = await dev.wavelengths();
     await dev.setIntegrationUs(S.intMs * 1000);
     S.dev = dev;
     S.dark = null;
     S.darkIntMs = null;
+    S.yRange = null;
     toast(`Connected: ${dev.model} S/N ${dev.serialNumber}`, "ok");
+    if (!p.verified) {
+      toast(`${p.model} has not been tested with Spektra yet. Please report how it works (GitHub).`, "info", 9000, "experimental");
+    }
   } catch (e) {
-    if (!(e?.name === "NotFoundError" && /select/i.test(e.message))) toast(connectErrorText(e), "bad", 10000);
+    if (e instanceof UnsupportedInstrument) showUnsupported(e.device, e.profile);
+    else if (!(e?.name === "NotFoundError" && /select/i.test(e.message))) toast(connectErrorText(e), "bad", 10000);
   } finally {
     S.busy = false;
     updateUi();
@@ -94,14 +98,15 @@ async function disconnect() {
   }
 }
 
-/** Notice when the HDX is unplugged, and release it when the page closes. */
+/** Notice when the instrument is unplugged, and release it when the page closes. */
 export function watchDevice() {
-  if (HDXUSB.supported()) {
+  if (usbSupported()) {
     navigator.usb.addEventListener("disconnect", (e) => {
-      if (S.dev instanceof HDXUSB && S.dev.dev === e.device) {
+      if (isDeviceOf(S.dev, e.device)) {
         S.live = false;
+        const model = S.dev.model;
         S.dev = null;
-        toast("HDX was unplugged.", "bad");
+        toast(`${model} was unplugged.`, "bad");
         updateUi();
       }
     });
@@ -118,7 +123,7 @@ export async function acquireOnce() {
   try {
     const f = await acquireFrame();
     showFrame(f);
-    toast(`Spectrum acquired — ${scans}, max ${f.rawMax.toFixed(0)} counts`, f.rawMax >= SATURATION ? "bad" : "ok", 4000, "acq");
+    toast(`Spectrum acquired — ${scans}, max ${f.rawMax.toFixed(0)} counts`, f.rawMax >= satLevel() ? "bad" : "ok", 4000, "acq");
     if (S.autoInt) await autoAdjustIntegration(f);
   } catch (e) {
     toast(`Acquisition failed: ${e.message}`, "bad", 6000, "acq");
@@ -167,7 +172,7 @@ export async function toggleLive() {
 
 export async function applyIntegration(ms, auto = false) {
   if (!Number.isFinite(ms)) ms = S.intMs;
-  ms = clamp(Math.round(ms * 1000) / 1000, MIN_INT_MS, MAX_INT_MS);
+  ms = clamp(Math.round(ms * 1000) / 1000, ...S.intLimitsMs);
   const changed = ms !== S.intMs;
   S.intMs = ms;
   showExposure(true);

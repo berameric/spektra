@@ -1,8 +1,6 @@
 // Fixed settings: instrument limits, detection criteria, colours and storage keys.
 
-export const MIN_INT_MS = 6, MAX_INT_MS = 10000;
 export const INT_STEPS = [6, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
-export const SATURATION = 65000; // 16-bit ADC
 export const AUTO_INT_TARGET = 0.8, AUTO_INT_BAND = [0.6, 0.9]; // highest peak as a fraction of full scale
 export const DEFAULT_RANGE = { nm: [200, 1100], eV: [1.1, 6.2] };
 

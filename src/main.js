@@ -2,7 +2,7 @@
 // Entry point: connects the page controls to the modules and starts the app.
 
 import { acquireOnce, applyIntegration, clearDark, connect, takeDark, toggleLive, watchDevice } from "./acquisition.js";
-import { INT_STEPS, MAX_INT_MS, MIN_INT_MS } from "./config.js";
+import { INT_STEPS } from "./config.js";
 import { exportPeaks, exportPlotPng, exportSpectrum } from "./export.js";
 import { clearSelection, reanalyze, requestRender, setDetect, setJacobian, setLogY, setSelection, setUnit, toggleReference } from "./spectrum.js";
 import { S } from "./state.js";
@@ -72,8 +72,8 @@ $("peaksCsvBtn").addEventListener("click", () => { $("exportPop").hidePopover();
 
 // ---------------------------------------------------------------- exposure control
 const stepExposure = (dir) => applyIntegration(dir > 0
-  ? INT_STEPS.find((v) => v > S.intMs) ?? MAX_INT_MS
-  : [...INT_STEPS].reverse().find((v) => v < S.intMs) ?? MIN_INT_MS);
+  ? INT_STEPS.find((v) => v > S.intMs) ?? S.intLimitsMs[1]
+  : [...INT_STEPS].reverse().find((v) => v < S.intMs) ?? S.intLimitsMs[0]);
 
 const intInput = $("intInput");
 intInput.addEventListener("change", () => {

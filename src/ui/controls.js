@@ -1,12 +1,12 @@
 // Control states: top bar, signal meter, first-run guide, processing chain and the popovers that set it.
 // Whatever needs the user's attention next (connect, dark, exposure) is emphasised here.
 
-import { MOCK, SATURATION, STORE_GUIDE } from "../config.js";
-import { HDXUSB } from "../device/hdx-usb.js";
-import { S, darkValid } from "../state.js";
+import { MOCK, STORE_GUIDE } from "../config.js";
+import { usbSupported } from "../device/index.js";
+import { S, darkValid, satLevel } from "../state.js";
 import { $, clamp, store } from "../util.js";
 
-export const usbAvailable = () => MOCK || (HDXUSB.supported() && window.isSecureContext);
+export const usbAvailable = () => MOCK || (usbSupported() && window.isSecureContext);
 
 export function updateUi() {
   const c = !!S.dev, usb = usbAvailable();
@@ -132,8 +132,8 @@ export function updateMeter() {
     $("meterText").textContent = "No data";
     $("meterPct").textContent = "";
   } else {
-    const frac = clamp(max / 65535, 0, 1);
-    const [, level, word, bars] = max >= SATURATION ? [0, "sat", "Saturated", 5] : SIGNAL_LEVELS.find(([lim]) => frac < lim);
+    const frac = clamp(max / S.fullScale, 0, 1);
+    const [, level, word, bars] = max >= satLevel() ? [0, "sat", "Saturated", 5] : SIGNAL_LEVELS.find(([lim]) => frac < lim);
     sig.dataset.level = level;
     $("meterText").textContent = word;
     $("meterPct").textContent = `${Math.round(frac * 100)} %`;

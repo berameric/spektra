@@ -111,7 +111,7 @@ export function createPlot(keepX, keepY = keepX) {
   installInteractions(u);
 
   const xr = prevX && prevX[0] != null ? prevX : (S.disp ? dataXRange() : DEFAULT_RANGE[S.unit]);
-  let yr = prevY && prevY[0] != null ? prevY : (S.yRange || [0, 65535 * 1.05]);
+  let yr = prevY && prevY[0] != null ? prevY : (S.yRange || [0, S.fullScale * 1.05]);
   if (S.logY && yr[0] <= 0) yr = [1, 1e5];
   u.batch(() => {
     u.setScale("x", { min: xr[0], max: xr[1] });

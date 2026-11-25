@@ -1,8 +1,8 @@
 // From acquired frame to screen: display unit, peak detection within the selection, and render scheduling.
 
 import { energySpectrum, findEnergyPeaks, findSpectralPeaks, nmToEv } from "./analysis/peaks.js";
-import { AUTO_PEAKS, SATURATION } from "./config.js";
-import { S, perMev } from "./state.js";
+import { AUTO_PEAKS } from "./config.js";
+import { S, perMev, satLevel } from "./state.js";
 import { updateMeter } from "./ui/controls.js";
 import { dismissHint, updateHint } from "./ui/hints.js";
 import { toast } from "./ui/notify.js";
@@ -111,7 +111,7 @@ export function showFrame(f) {
   S.frame = f;
   S.disp = toDisplay(f.wl, f.inten);
   const wasSaturated = S.saturated;
-  S.saturated = f.rawMax >= SATURATION;
+  S.saturated = f.rawMax >= satLevel();
   if (S.saturated && !wasSaturated) {
     toast("Detector saturated — the highest peak is clipped. Shorten the exposure or turn on Auto.", "bad", 6000, "sat");
   } else if (wasSaturated && !S.saturated) {

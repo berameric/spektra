@@ -16,8 +16,13 @@ install: the repository root is the site (GitHub Pages serves `main` as is).
   non-obvious functions. Do not add `.ts` files or type-only tooling.
 - **Analysis stays pure.** `src/analysis/` has no DOM access and runs in Node; keep it that way and cover
   changes with `tests/test_web_analysis.mjs`.
-- **Do not claim hardware support you have not tested.** Only the HDX is verified. Other models go in as
-  clearly marked experimental profiles (see CONTRIBUTING.md).
+- **Do not claim hardware support you have not tested.** Only the HDX is verified. Other models go in the
+  profile table with `verified: false` and open as "experimental" (see CONTRIBUTING.md).
+- **Model-specific values belong in `src/device/profiles.js`,** never as constants elsewhere: full scale,
+  pixel count and exposure limits reach the app through the connected instrument (`S.fullScale`,
+  `S.intLimitsMs`, `satLevel()`).
+- **Never send bytes to an instrument whose protocol is unknown or different** from the driver's; reports for
+  unsupported devices read the USB descriptors only, unless the user opts into read-only OBP requests.
 - **The simulated HDX is development only.** `src/device/mock-hdx.js` loads only on `localhost` with `?mock`
   (`MOCK` in `config.js`); never make it reachable on the published site.
 
@@ -32,12 +37,12 @@ install: the repository root is the site (GitHub Pages serves `main` as is).
 | `src/acquisition.js` | Connect, acquire, live loop, exposure, dark |
 | `src/spectrum.js` | Frame → display unit, peak detection, render scheduling (one render per frame) |
 | `src/export.js` | CSV and PNG export |
-| `src/device/` | `hdx-usb.js` (WebUSB + Ocean Binary Protocol), `mock-hdx.js` (same interface) |
+| `src/device/` | `index.js` (recognise and open an instrument), `profiles.js` (model table), `usb-link.js` (WebUSB transport), `obp.js` (OBP messages), `obp-instrument.js` (profile-driven spectrometer), `probe.js` (report for unsupported devices), `mock-hdx.js` (same interface) |
 | `src/analysis/peaks.js` | Baseline, peak finding, FWHM, area, Jacobian energy conversion |
 | `src/ui/` | One module per surface: `plot`, `plot-overlays`, `overview`, `peaks`, `rail`, `controls`, `notify`, `environment`, `hints` |
 | `src/styles/spektra.css` | All styles; design tokens on `:root` |
 | `tests/` | Node tests, no dependencies |
-| `docs/PROTOCOL.md` | How the driver speaks to the instrument; keep it in step with `hdx-usb.js` |
+| `docs/PROTOCOL.md` | How the driver speaks to the instrument; keep it in step with `src/device/` |
 
 Keep this shape: a new feature gets its own module rather than growing `main.js`. Avoid import cycles;
 pass callbacks (as `initPlot(handlers)` does) when a lower module must reach a higher one.

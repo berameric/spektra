@@ -18,6 +18,8 @@ export const S = {
   focusPeak: -1, // peak whose row was clicked: the plot is zoomed to it
   peakSort: { key: "n", dir: 1 }, // table order
   yRange: null,
+  fullScale: 65535,       // detector full scale and integration-time limits of the connected instrument
+  intLimitsMs: [6, 10000], // (HDX values until another instrument connects)
   logY: false,
   ref: null,     // held reference spectrum {wl, inten, time}, drawn under the live one
   refDisp: null, // the reference in the display unit
@@ -40,6 +42,9 @@ export function selText() {
   const [a, b] = dispRange(S.sel.lo, S.sel.hi);
   return `${a.toFixed(d)} – ${b.toFixed(d)} ${S.unit}`;
 }
+
+/** Counts from which a pixel is taken as saturated (just below full scale, as ADCs clip there). */
+export const satLevel = () => Math.round(S.fullScale * 0.992);
 
 // A dark spectrum is valid only at the exposure it was measured with
 export const darkValid = () => S.dark !== null && Math.abs(S.darkIntMs - S.intMs) < 1e-6;

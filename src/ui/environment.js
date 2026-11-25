@@ -1,7 +1,7 @@
 // Start-up system check: detects the OS and browser and explains what is still needed to reach the HDX.
 
 import { MOCK, STORE_ENV } from "../config.js";
-import { HDXUSB } from "../device/hdx-usb.js";
+import { usbSupported } from "../device/index.js";
 import { $, store } from "../util.js";
 
 function detectPlatform() {
@@ -27,7 +27,7 @@ function environmentNotes({ os, browser }) {
       level: "block", title: "Use a computer or an Android device",
       html: "<p>Browsers on iPhone and iPad cannot open USB devices from a web page.</p>",
     });
-  } else if (!HDXUSB.supported()) {
+  } else if (!usbSupported()) {
     notes.push({
       level: "block", title: `${browser} cannot open USB devices`,
       html: "<p>This page talks to the spectrometer through WebUSB, which only Chromium-based browsers provide. "
@@ -41,7 +41,7 @@ function environmentNotes({ os, browser }) {
         + "Use the published HTTPS address, or serve the folder locally.</p>",
     });
   }
-  if (os === "Android" && HDXUSB.supported()) {
+  if (os === "Android" && usbSupported()) {
     notes.push({
       level: "setup", title: "Android: connect over USB OTG",
       html: "<p>Connect the HDX (on its own power supply) with a USB-C (OTG) adapter or cable, "

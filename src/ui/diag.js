@@ -7,7 +7,6 @@ import { S } from "../state.js";
 import { $ } from "../util.js";
 import { toast } from "./notify.js";
 
-const PIXEL_BYTES = 2068 * 2;
 const MESSAGES = [0x00101000, 0x00101100];
 const hex = (v) => "0x" + v.toString(16).padStart(8, "0");
 
@@ -17,17 +16,18 @@ async function capture(type) {
   try {
     const bytes = await S.dev.readMessage(type);
     const ms = Math.round(performance.now() - t0);
-    if (bytes.length < PIXEL_BYTES) return { type: hex(type), ms, bytes: bytes.length, error: "reply shorter than 2068 pixels" };
-    const v = new DataView(bytes.buffer, bytes.byteOffset + bytes.length - PIXEL_BYTES, PIXEL_BYTES);
-    const px = Array.from({ length: 2068 }, (_, i) => v.getUint16(2 * i, true));
+    const { pixels, pixelBytes } = S.dev.profile, need = pixels * pixelBytes;
+    if (bytes.length < need) return { type: hex(type), ms, bytes: bytes.length, error: `reply shorter than ${pixels} pixels` };
+    const v = new DataView(bytes.buffer, bytes.byteOffset + bytes.length - need, need);
+    const px = Array.from({ length: pixels }, (_, i) => (pixelBytes === 4 ? v.getUint32(4 * i, true) : v.getUint16(2 * i, true)));
     const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
-    const meta = bytes.length - PIXEL_BYTES;
+    const meta = bytes.length - need;
     return {
       type: hex(type), ms, bytes: bytes.length, metadataBytes: meta,
       metadataHex: Array.from(bytes.subarray(0, Math.min(meta, 64)), (b) => b.toString(16).padStart(2, "0")).join(" "),
       min: Math.min(...px), max: Math.max(...px), mean: +mean(px).toFixed(1),
       first20: +mean(px.slice(0, 20)).toFixed(1), last20: +mean(px.slice(-20)).toFixed(1),
-      zeros: px.filter((x) => x === 0).length, saturated: px.filter((x) => x >= 65535).length, px,
+      zeros: px.filter((x) => x === 0).length, saturated: px.filter((x) => x >= S.fullScale).length, px,
     };
   } catch (e) {
     return { type: hex(type), ms: Math.round(performance.now() - t0), error: e.message };

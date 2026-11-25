@@ -3,8 +3,10 @@
 This document describes how Spektra communicates with the Ocean Insight HDX. Spektra does not use the
 manufacturer's driver, SDK or application software. It implements the instrument's message protocol, the
 Ocean Binary Protocol (OBP), directly in JavaScript and exchanges the messages over USB through the browser's
-WebUSB interface. The implementation is [`src/device/hdx-usb.js`](../src/device/hdx-usb.js); every value given
-below is taken from it.
+WebUSB interface. The implementation is in [`src/device/`](../src/device/): the WebUSB transport
+([`usb-link.js`](../src/device/usb-link.js)), the OBP message layer ([`obp.js`](../src/device/obp.js)) and a
+spectrometer driven by a per-model profile ([`obp-instrument.js`](../src/device/obp-instrument.js),
+[`profiles.js`](../src/device/profiles.js)). Every value given below is taken from these files.
 
 The document covers only the part of OBP that Spektra uses. For the complete protocol, refer to Ocean
 Insight's documentation for the instrument and its firmware.
@@ -130,27 +132,52 @@ When the instrument is powered from its own supply, unplugging the USB cable doe
 interrupted session it may not answer. If the serial-number request receives no reply, Spektra issues a USB
 reset, waits 3 s for the device to settle, locates it again and repeats the connection sequence once.
 
-## 7. Adding another instrument
+## 7. Instrument recognition and other models
 
-The protocol layer (Sections 1, 2, 4 and 5) is shared by Ocean Insight instruments that use OBP. The following
-are specific to the HDX and would form a per-model profile:
+The protocol layer (Sections 1, 2, 4 and 5) is shared by Ocean Insight instruments that use OBP. What differs
+between models is kept in a table of profiles ([`src/device/profiles.js`](../src/device/profiles.js)), one entry
+per model:
 
 | Parameter | HDX |
 |---|---|
-| USB product ID | `0x2003` |
-| Number of pixels | 2 068 |
-| Spectrum message type and pixel format | `0x00101000`, 16-bit unsigned |
+| USB vendor and product ID | `0x2457`, `0x2003` |
+| Protocol | OBP |
+| Number of pixels, bytes per pixel | 2 068, 2 |
+| Spectrum message | `0x00101000` |
 | Full-scale count | 65 535 |
 | Integration-time limits | 6 ms – 10 s |
+| Bulk endpoints | 1 OUT, 1 IN |
+| Verified with Spektra | yes |
 
-Each value must be taken from the manufacturer's documentation for the model and firmware concerned and
-verified on the instrument. Instruments that use Ocean Insight's earlier, non-OBP command set require a separate
-driver offering the same four operations: `wavelengths()`, `setIntegrationUs()`, `intensities()` and `close()`.
-The simulated instrument in [`src/device/mock-hdx.js`](../src/device/mock-hdx.js) shows this interface in its
-simplest form. See also [CONTRIBUTING.md](../CONTRIBUTING.md).
+**Recognition.** The browser's device dialog lists every Ocean Insight device (vendor IDs `0x2457` and
+`0x0999`). When one is selected, Spektra looks up its vendor and product ID in the table and opens it with the
+driver of its protocol; nothing has to be set by hand. Entries not yet verified on the instrument open with a
+notice asking for a test report.
+
+**Models in the table.** Besides the HDX, the table contains the OBP models STS, QE Pro, Spark and Ventana,
+whose parameters are taken from [python-seabreeze](https://github.com/ap--/python-seabreeze) (MIT licence) and
+are not yet verified. It also recognises models that use protocols Spektra does not implement: the Ocean ST,
+SR and HR series (OBP2, vendor ID `0x0999`) and the earlier instruments using the single-byte command set
+(USB2000+, USB4000, HR4000, Maya, QE65000, NIRQuest, Jaz and others).
+
+**Unsupported and unknown instruments.** For a recognised model whose protocol is not implemented, or for an
+Ocean device not in the table, Spektra does not attempt to operate it. It shows a report built from the USB
+descriptors alone ([`src/device/probe.js`](../src/device/probe.js)), which involves no communication with the
+instrument, and offers to open a pre-filled GitHub issue. For a device that may speak OBP, the user can add
+read-only OBP requests to the report (serial number, coefficient counts and the three spectrum messages); the
+bulk endpoints are taken from the interface descriptor. These requests are not offered for instruments known to
+use another protocol, whose firmware could interpret the bytes as commands.
+
+**Adding a model** that uses OBP means adding its entry to the table; each value must be confirmed with the
+manufacturer's documentation or on the instrument, and `verified` set only after a test with Spektra. A model
+using another protocol needs a driver offering the same operations as the OBP instrument: `wavelengths()`,
+`setIntegrationUs()`, `intensities()` and `close()`; the transport in `usb-link.js` can be reused. The simulated
+instrument in [`src/device/mock-hdx.js`](../src/device/mock-hdx.js) shows this interface in its simplest form. See
+also [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## 8. Verification
 
-[`tests/test_web_usb.mjs`](../tests/test_web_usb.mjs) runs the driver in Node against an emulated device that
-speaks the message format above, including lost and duplicated replies and error replies. The driver has been used with
-an HDX connected to computers running Linux and to an Android phone.
+[`tests/test_web_usb.mjs`](../tests/test_web_usb.mjs) runs the driver in Node against emulated devices that
+speak the message format above, including lost and duplicated replies, error replies and a model with 32-bit
+pixels preceded by metadata; it also checks the profile table and the recognition of unsupported and unknown
+instruments. The driver has been used with an HDX connected to computers running Linux and to an Android phone.

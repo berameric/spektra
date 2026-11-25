@@ -1,11 +1,14 @@
-// Simulated HDX for development: same interface as HDXUSB, no hardware needed.
+// Simulated HDX for development: same interface as ObpInstrument (src/device/obp-instrument.js), no hardware needed.
 // Enabled only on localhost with ?mock in the address (see MOCK in config.js); never loaded otherwise.
 //
 // The "lamp" is a mercury pen-lamp line set plus a broad photoluminescence band. Counts scale with the
 // exposure, carry shot and read noise, sit on a detector offset and clip at 65 535 like the real detector.
 
-const PIXELS = 2068;
-const FULL_SCALE = 65535;
+import { PROFILES } from "./profiles.js";
+
+const PROFILE = PROFILES.find((p) => p.model === "HDX");
+const PIXELS = PROFILE.pixels;
+const FULL_SCALE = PROFILE.fullScale;
 // [centre nm, sigma nm, counts per ms of exposure]
 const LINES = [
   [404.66, 0.8, 90], [435.83, 0.8, 240], [546.07, 0.85, 350], [576.96, 0.9, 70], [579.07, 0.9, 75],
@@ -24,6 +27,8 @@ export class MockHDX {
 
   constructor() {
     this.model = "HDX";
+    this.profile = PROFILE;
+    this.fullScale = PROFILE.fullScale;
     this.serialNumber = "MOCK0001";
     this.intUs = 100000;
     this.shutterClosed = false;
@@ -61,9 +66,9 @@ export class MockHDX {
     return out;
   }
 
-  /** Same as HDXUSB.readMessage: both spectrum messages return the simulated spectrum as 16-bit pixels. */
+  /** Like the HDX: 0x00101000 returns the simulated spectrum as 16-bit pixels, other messages error 2. */
   async readMessage(msgType) {
-    if (msgType !== 0x00101000 && msgType !== 0x00101100) throw new Error("HDX error 2: unknown message type");
+    if (msgType !== 0x00101000) throw new Error("Instrument error 2: unknown message type");
     const px = await this.intensities();
     const out = new Uint8Array(px.length * 2);
     const v = new DataView(out.buffer);
