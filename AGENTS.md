@@ -79,3 +79,14 @@ pass callbacks (as `initPlot(handlers)` does) when a lower module must reach a h
 2. `npm start`, open `http://localhost:8000/?mock`, and exercise what you changed: connect, Live, the
    feature itself. Check the browser console for errors.
 3. Commits: a short imperative subject line, then a body that says what changed and why.
+
+## Branches and pull requests
+
+- **Never push to `main`.** GitHub Pages publishes `main` as is, so every change reaches it through a pull
+  request that the maintainer merges.
+- **One change per branch, one branch per pull request,** branched from the current `main` and named by kind:
+  `feat/…`, `fix/…`, `docs/…`, `refactor/…`, `test/…`.
+- **Keep pull requests independent,** so they can be merged in any order or left out. Do not build one on an
+  unmerged branch; when two changes truly depend on each other, say so in both descriptions.
+- The description says what changed, why, and how it was tested: `npm test`, the `?mock` checks, and whether
+  a real instrument was used (and which). Driver changes are not merged before a test on hardware.
