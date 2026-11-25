@@ -34,7 +34,7 @@ function frame(type, payload, errno = 0) {
 class FakeObpDevice {
   opened = false; configuration = null;
   queue = []; pending = []; sent = []; itime = 0;
-  dropNext = 0; dupNext = 0;
+  dropNext = 0; dupNext = 0; dupAt = -1; // dupAt: number of the request (count of sent) whose reply is repeated
   constructor(productId = 0x2003, spec = { message: 0x00101000, pixels: HDX_PIXELS, bytes: 2, meta: 64 }) {
     this.vendorId = 0x2457;
     this.productId = productId;
@@ -87,10 +87,11 @@ class FakeObpDevice {
       return { status: "ok" };
     }
     if (this.dropNext > 0) { this.dropNext--; return { status: "ok" }; }
-    const f = frame(type, reply);
+    const f = frame(type, reply), dup = this.sent.length === this.dupAt;
     setTimeout(() => {
       this._emit(f);
       if (this.dupNext > 0) { this.dupNext--; this._emit(f); }
+      else if (dup) this._emit(f);
     }, 1);
     return { status: "ok" };
   }
@@ -106,6 +107,14 @@ assert.equal(hdx.fullScale, 65535);
 const wl = await hdx.wavelengths();
 assert.equal(wl.length, HDX_PIXELS);
 assert.ok(Math.abs(wl[0] - 200) < 1e-9 && Math.abs(wl[10] - 205) < 1e-6);
+
+// A repeated coefficient reply must not shift the coefficients by one (it stretched the axis to millions of nm)
+for (const k of [1, 2, 3, 4, 5]) {
+  dev.dupAt = dev.sent.length + k; // the k-th request from here is answered twice
+  const again = await hdx.wavelengths();
+  assert.ok(Math.abs(again[0] - 200) < 1e-9 && Math.abs(again[10] - 205) < 1e-6, `duplicate reply to request ${k}: ${again[10]}`);
+}
+dev.dupAt = -1;
 
 await hdx.setIntegrationUs(50_000);
 assert.equal(dev.itime, 50_000);
