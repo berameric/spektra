@@ -5,6 +5,8 @@ instrument directly over USB (WebUSB): nothing to install.
 
 Developed at the Nano Optoelectronics Laboratories, Istanbul University.
 
+**Version 2.0** — the browser successor of the earlier desktop program (1.x). See the [changelog](CHANGELOG.md).
+
 ## Getting started
 
 1. Open **[berameric.github.io/spektra](https://berameric.github.io/spektra/)** in Google Chrome or Microsoft Edge.
