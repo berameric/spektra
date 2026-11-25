@@ -15,7 +15,7 @@ Application: <https://berameric.github.io/spektra/> · Version 2.0.0 ([changelog
 ## Getting started
 
 1. Open <https://berameric.github.io/spektra/> in Google Chrome or Microsoft Edge.
-2. Connect the HDX and press **Connect HDX**; select the instrument in the browser's device dialog.
+2. Connect the HDX and press **Connect**; select the instrument in the browser's device dialog.
 3. Press **Live** for continuous acquisition or **Acquire** for a single spectrum.
 
 On first start, Spektra checks the operating system and browser and lists any preparation still required

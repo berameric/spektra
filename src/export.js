@@ -46,7 +46,7 @@ export function exportSpectrum() {
   if (!S.frame) return;
   const { wl, inten } = S.frame;
   const { offset, factor } = energySpectrum(wl, inten);
-  const lines = metaHeader("Spektra — HDX spectrum", [
+  const lines = metaHeader("Spektra — spectrum", [
     "# intensity: counts per pixel",
     `# intensity_per_mev: Jacobian conversion (intensity - ${offset.toFixed(1)} offset) / pixel width in meV, i.e. I(lambda)*lambda^2/hc`,
   ]);
@@ -80,7 +80,7 @@ export function exportPlotPng() {
 export function exportPeaks() {
   if (!S.frame || !S.peaks.length) return;
   const range = S.sel ? `${S.sel.lo.toFixed(3)}-${S.sel.hi.toFixed(3)} nm` : "whole spectrum";
-  const lines = metaHeader("Spektra — HDX detected peaks", [
+  const lines = metaHeader("Spektra — detected peaks", [
     `# search_range: ${range}`,
     perMev()
       ? "# measured_on: energy axis, Jacobian-converted (height in counts/meV, area in counts)"

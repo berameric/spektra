@@ -16,7 +16,7 @@ export function updateUi() {
   // Opening the device can take a few seconds (longer on phones): say so on the button itself
   const connecting = S.busy && !c;
   $("connectBtn").classList.toggle("busy", connecting);
-  $("connectText").innerHTML = connecting ? "Connecting…" : 'Connect<span class="lbl"> HDX</span>';
+  $("connectText").innerHTML = connecting ? "Connecting…" : "Connect";
   $("disconnectBtn").hidden = !c;
   $("conn").classList.toggle("on", c);
   $("led").className = `led${c ? " on" : ""}${S.live ? " live" : ""}`;
