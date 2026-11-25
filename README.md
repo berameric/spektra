@@ -9,7 +9,7 @@ subtraction, averaging and CSV export.
 
 ![Spektra showing a live spectrum with detected peaks (simulated data)](assets/screenshot.png)
 
-Developed at the Nano Optoelectronics Laboratories, Istanbul University.
+Developed at the [Nano Optoelectronics Laboratories](https://nano-optoelectronics.istanbul.edu.tr/en/_), Istanbul University.
 
 **Version 2.0** — the browser successor of the earlier desktop program (1.x). See the [changelog](CHANGELOG.md).
 
@@ -83,7 +83,7 @@ welcome;** see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Author
 
-[Bilal Bera Meriç](https://github.com/berameric) — Nano Optoelectronics Laboratories, Istanbul University.
+[Bilal Bera Meriç](https://github.com/berameric) — [Nano Optoelectronics Laboratories](https://nano-optoelectronics.istanbul.edu.tr/en/_), Istanbul University.
 
 Plotting by [uPlot](https://github.com/leeoniya/uPlot) (MIT); icons from [Lucide](https://lucide.dev) (ISC).
 
