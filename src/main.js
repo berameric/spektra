@@ -6,6 +6,7 @@ import { INT_STEPS } from "./config.js";
 import { exportPeaks, exportPlotPng, exportSpectrum } from "./export.js";
 import { clearSelection, reanalyze, requestRender, setDetect, setJacobian, setLogY, setSelection, setUnit, toggleReference } from "./spectrum.js";
 import { S } from "./state.js";
+import { initCalibration } from "./ui/calibration.js";
 import { initPopovers, parseExposure, showExposure, showGuide, updateChain, updateUi } from "./ui/controls.js";
 import { initHints } from "./ui/hints.js";
 import { initPeakTable, markRows, peakTableText } from "./ui/peaks.js";
@@ -33,6 +34,7 @@ initRail();
 initMobile(() => setRailCollapsed(true)); // phones start with the peaks drawer closed
 initPopovers();
 initDiag(); // ?diag only
+initCalibration();
 initHints();
 initPeakTable({
   onHover: setHoverPeak,

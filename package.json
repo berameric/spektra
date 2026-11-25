@@ -6,7 +6,7 @@
   "description": "Browser acquisition and peak analysis for the Ocean Insight HDX spectrometer",
   "type": "module",
   "scripts": {
-    "test": "node tests/test_web_analysis.mjs && node tests/test_web_usb.mjs",
+    "test": "node tests/test_web_analysis.mjs && node tests/test_web_calibration.mjs && node tests/test_web_usb.mjs",
     "start": "node scripts/serve.mjs",
     "dev": "node scripts/serve.mjs"
   }

@@ -108,6 +108,14 @@ tested in Node.
 5. Photon energy is E = hc/λ with hc = 1239.841 984 eV·nm (CODATA 2018). On the energy axis, intensities are
    converted from counts per pixel to counts per meV (the Jacobian |dλ/dE| = λ²/hc applied to each pixel width),
    so that the position and shape of broad bands are not distorted.
+6. Wavelength calibration ([`src/analysis/calibration.js`](src/analysis/calibration.js)) corrects the
+   instrument's factory calibration with a lamp of known lines (fluorescent room light, mercury-argon, neon,
+   a laser line, or lines entered by the user; air wavelengths from the NIST Atomic Spectra Database). Detected
+   peaks are matched to the reference lines by the shift that pairs the most lines, the pairing is refined with
+   the fitted correction, and lines far outside the fit are rejected. The correction Δλ(λ) is a polynomial
+   added to the factory wavelengths: an offset for one line, linear for two or three, quadratic for four or
+   more. It is stored per instrument in the browser, recorded in exported files, and never written to the
+   instrument.
 
 ## Implementation
 

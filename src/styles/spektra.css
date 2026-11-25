@@ -423,6 +423,29 @@ input[type="number"], input[type="text"] {
 .help dd { margin: 0; color: var(--muted); }
 .help-actions { display: flex; gap: 8px; margin-top: 14px; }
 
+/* ---- wavelength calibration ---- */
+#calInfo { white-space: pre-line; }
+select {
+  font: inherit; height: 32px; padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 8px;
+  background: var(--panel); color: var(--text); cursor: pointer;
+}
+dialog.cal { width: min(620px, calc(100vw - 32px)); }
+.cal-src { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+.cal-src #calCustom { flex: 1; min-width: 200px; width: auto; text-align: left; }
+.cal-src .btn { margin-left: auto; }
+dialog .cal-note { margin: 0 0 12px; font-size: 12px; }
+.cal-table-wrap { max-height: 280px; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
+.cal-table-wrap:has(tbody:empty) { display: none; }
+.cal-table { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.cal-table th { position: sticky; top: 0; padding: 7px 12px; background: var(--panel-2); color: var(--muted); font-weight: 500; text-align: right; }
+.cal-table td { padding: 3px 12px; text-align: right; border-top: 1px solid var(--border); }
+.cal-table th:first-child, .cal-table td:first-child { width: 48px; text-align: center; }
+.cal-table td:last-child, .cal-table th:last-child { text-align: left; }
+.cal-table input[type="text"] { width: 92px; height: 26px; }
+.cal-table tr.off td:not(:first-child), .cal-table tr.off input { color: var(--muted); }
+.cal-table .flag { color: var(--warn); font-size: 11.5px; }
+dialog .cal-sum { margin: 12px 0 18px; font-size: 12px; color: var(--text); }
+
 /* ---- dialog & toasts ---- */
 dialog {
   border: 1px solid var(--border-strong); border-radius: 14px; background: var(--panel); color: var(--text);
@@ -548,6 +571,14 @@ html.compact body { grid-template-columns: 58px minmax(0, 1fr); grid-template-ro
 .compact .stage .k { order: 1; writing-mode: vertical-rl; font-size: 11.5px; font-weight: 600; color: var(--text); letter-spacing: .02em; }
 .compact .stage .st-short { order: 2; display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: 13px; font-weight: 650; color: var(--text); }
 .compact .stage .dot { position: absolute; top: 5px; right: 5px; }
+/* "Wavelength" does not fit a phone tile sideways: the tile shows λ */
+.compact .stage .k[data-short] { font-size: 0; }
+.compact .stage .k[data-short]::before { content: attr(data-short); font-size: 15px; text-orientation: upright; }
+/* Phones: the line table gets the height, the explanations stay on the larger screen */
+.compact dialog.cal { padding: 14px 16px; }
+.compact dialog.cal > p:first-of-type, .compact dialog .cal-note { display: none; }
+.compact .cal-table-wrap { max-height: 38vh; }
+.compact dialog .cal-sum { margin: 8px 0 10px; }
 .compact #toasts { bottom: 10px; gap: 4px; }
 .compact .toast { padding: 6px 11px; font-size: 12px; border-radius: 8px; gap: 8px; max-width: min(420px, calc(100vw - 32px)); }
 .compact .toast::before { width: 6px; height: 6px; margin-top: 5px; }

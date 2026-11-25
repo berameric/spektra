@@ -4,6 +4,8 @@ import { evToNm, nmToEv } from "./analysis/peaks.js";
 
 export const S = {
   dev: null, wl: null, intMs: 100, unit: "nm",
+  factoryWl: null, // wavelengths from the instrument's own calibration; S.wl adds the correction in S.cal
+  cal: null,       // wavelength calibration in use (src/ui/calibration.js), null for the factory one
   avg: 1, boxcar: 0, autoInt: false,
   dark: null, darkIntMs: null, subtractDark: true,
   live: false, busy: false, measuringDark: false, scans: 0, fps: 0, saturated: false,
