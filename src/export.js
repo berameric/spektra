@@ -1,8 +1,8 @@
 // CSV export of the current spectrum and of the detected peaks, with acquisition metadata.
 
-import { nmToEv } from "./analysis/peaks.js";
+import { energySpectrum, nmToEv } from "./analysis/peaks.js";
 import { AUTO_PEAKS } from "./config.js";
-import { S } from "./state.js";
+import { S, perMev } from "./state.js";
 import { toast } from "./ui/notify.js";
 import { fmt } from "./util.js";
 
@@ -34,9 +34,15 @@ function download(lines, prefix) {
 export function exportSpectrum() {
   if (!S.frame) return;
   const { wl, inten } = S.frame;
-  const lines = metaHeader("Spektra — HDX spectrum");
-  lines.push("wavelength_nm,energy_ev,intensity");
-  for (let i = 0; i < wl.length; i++) lines.push(`${wl[i]},${nmToEv(wl[i])},${inten[i]}`);
+  const { offset, factor } = energySpectrum(wl, inten);
+  const lines = metaHeader("Spektra — HDX spectrum", [
+    "# intensity: counts per pixel",
+    `# intensity_per_mev: Jacobian conversion (intensity - ${offset.toFixed(1)} offset) / pixel width in meV, i.e. I(lambda)*lambda^2/hc`,
+  ]);
+  lines.push("wavelength_nm,energy_ev,intensity,intensity_per_mev");
+  for (let i = 0; i < wl.length; i++) {
+    lines.push(`${wl[i]},${nmToEv(wl[i])},${inten[i]},${Number.isFinite(factor[i]) ? (inten[i] - offset) * factor[i] : ""}`);
+  }
   download(lines, "spectrum");
 }
 
@@ -45,9 +51,12 @@ export function exportPeaks() {
   const range = S.sel ? `${S.sel.lo.toFixed(3)}-${S.sel.hi.toFixed(3)} nm` : "whole spectrum";
   const lines = metaHeader("Spektra — HDX detected peaks", [
     `# search_range: ${range}`,
+    perMev()
+      ? "# measured_on: energy axis, Jacobian-converted (height in counts/meV, area in counts)"
+      : "# measured_on: wavelength axis (height in counts per pixel)",
     `# detection: automatic (prominence >= ${AUTO_PEAKS.minSnr} x noise and >= ${AUTO_PEAKS.minProminenceFrac * 100} % of the strongest peak)`,
   ]);
-  lines.push("peak,wavelength_nm,energy_ev,fwhm_nm,fwhm_ev,counts,area,snr,strongest");
+  lines.push("peak,wavelength_nm,energy_ev,fwhm_nm,fwhm_ev,height,area,snr,strongest");
   S.peaks.forEach((p, i) => lines.push([
     i + 1, p.measuredPeak.toFixed(4), p.energyEv.toFixed(5), fmt(p.fwhmNm, 4), fmt(p.fwhmEv, 5),
     p.rawIntensity.toFixed(0), fmt(p.integratedIntensity, 1), p.snr.toFixed(1), i === S.mainPeak ? "yes" : "",

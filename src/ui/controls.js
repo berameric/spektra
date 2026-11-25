@@ -42,7 +42,9 @@ export function setDarkStatus(text, kind, short) {
 export function updateChain() {
   $("avgStage").textContent = S.avg === 1 ? "1 scan" : `${S.avg} scans`;
   $("boxcarStage").textContent = S.boxcar ? `±${S.boxcar} px` : "off";
-  $("displayStage").textContent = `${S.unit} · ${$("autoY").checked ? "auto Y" : "fixed Y"}`;
+  const eV = S.unit === "eV";
+  $("displayStage").textContent = `${S.unit}${eV && S.jacobian ? " /meV" : ""} · ${$("autoY").checked ? "auto Y" : "fixed Y"}`;
+  $("jacobianRow").hidden = $("jacobianNote").hidden = !eV;
   for (const box of document.querySelectorAll(".presets")) {
     const v = $(box.dataset.for).value;
     for (const b of box.children) b.classList.toggle("on", b.textContent === v);

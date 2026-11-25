@@ -96,13 +96,16 @@ function halfMaxCrossing(x, y, i0, i1, half) {
   return x[i0] + ((half - y0) * (x[i1] - x[i0])) / (y1 - y0);
 }
 
-/** Measure sub-pixel peak wavelength, photon energy, FWHM (nm & eV), intensity, and SNR. */
-function measurePeakAt(wl, raw, y, iPeak, noise) {
-  const peakVal = y[iPeak];
-  if (peakVal <= 3 * noise || iPeak <= 0 || iPeak >= wl.length - 1) return null;
+/**
+ * Measure the peak at sample i on any ascending axis x: sub-pixel centre, half-maximum crossings,
+ * height above baseline (y), plotted value, area within +/- 1.5 FWHM (fallbackHalf without a FWHM) and SNR.
+ */
+function measureAt(x, value, y, i, noise, fallbackHalf) {
+  const peakVal = y[i];
+  if (peakVal <= 3 * noise || i <= 0 || i >= x.length - 1) return null;
 
   // Sub-pixel peak: parabolic fit on log intensity (exact for Gaussian lines)
-  const ya = y[iPeak - 1], yb = y[iPeak], yc = y[iPeak + 1];
+  const ya = y[i - 1], yb = y[i], yc = y[i + 1];
   let delta;
   if (Math.min(ya, yb, yc) > 0) {
     const la = Math.log(ya), lb = Math.log(yb), lc = Math.log(yc);
@@ -113,48 +116,38 @@ function measurePeakAt(wl, raw, y, iPeak, noise) {
     delta = denom !== 0 ? (0.5 * (ya - yc)) / denom : 0;
   }
   delta = Math.min(0.5, Math.max(-0.5, delta));
-  const step = delta >= 0 ? wl[iPeak + 1] - wl[iPeak] : wl[iPeak] - wl[iPeak - 1];
-  const peakWl = wl[iPeak] + delta * step;
+  const step = delta >= 0 ? x[i + 1] - x[i] : x[i] - x[i - 1];
+  const center = x[i] + delta * step;
 
   // FWHM by interpolated half-maximum crossings
   const half = peakVal / 2;
-  let left = iPeak;
+  let left = i;
   while (left > 0 && y[left] > half) left--;
-  let right = iPeak;
+  let right = i;
   while (right < y.length - 1 && y[right] > half) right++;
-  let fwhmNm = NaN, fwhmEv = NaN;
+  let lo = NaN, hi = NaN;
   if (left !== 0 && right !== y.length - 1) {
-    const xLo = halfMaxCrossing(wl, y, left, left + 1, half);
-    const xHi = halfMaxCrossing(wl, y, right - 1, right, half);
-    fwhmNm = xHi - xLo;
-    if (xLo > 0 && xHi > 0) fwhmEv = Math.abs(nmToEv(xLo) - nmToEv(xHi));
+    lo = halfMaxCrossing(x, y, left, left + 1, half);
+    hi = halfMaxCrossing(x, y, right - 1, right, half);
   }
 
   // Integrated intensity within +/- 1.5 FWHM of the centre (~ 99.9 % of a Gaussian)
-  const halfWidth = Number.isFinite(fwhmNm) ? 1.5 * fwhmNm : 5.0;
-  let integrated = 0, count = 0, prev = -1;
-  for (let k = 0; k < wl.length; k++) {
-    if (Math.abs(wl[k] - peakWl) > halfWidth) continue;
-    if (prev >= 0) integrated += 0.5 * (y[prev] + y[k]) * (wl[k] - wl[prev]);
+  const halfWidth = Number.isFinite(hi - lo) ? 1.5 * (hi - lo) : fallbackHalf;
+  let area = 0, count = 0, prev = -1;
+  for (let k = 0; k < x.length; k++) {
+    if (Math.abs(x[k] - center) > halfWidth) continue;
+    if (prev >= 0) area += 0.5 * (y[prev] + y[k]) * (x[k] - x[prev]);
     prev = k;
     count++;
   }
 
-  return {
-    measuredPeak: peakWl,
-    energyEv: nmToEv(peakWl),
-    fwhmNm,
-    fwhmEv,
-    peakIntensity: peakVal,
-    rawIntensity: raw[iPeak],
-    integratedIntensity: count > 1 ? integrated : NaN,
-    snr: peakVal / noise,
-  };
+  return { center, lo, hi, height: peakVal, value: value[i], area: count > 1 ? area : NaN, snr: peakVal / noise, index: i };
 }
 
 /**
  * Find multiple peaks in the full spectrum or inside [wlMin, wlMax] (in nm).
- * Returns peaks sorted by descending peakIntensity so index 0 is always the strongest peak.
+ * Returns peaks sorted by descending peakIntensity so index 0 is always the strongest peak;
+ * `index` is the pixel of each maximum.
  */
 export function findSpectralPeaks(wavelength, intensity, {
   wlMin = null, wlMax = null, maxPeaks = 10, minSnr = 5.0,
@@ -198,11 +191,96 @@ export function findSpectralPeaks(wavelength, intensity, {
     const loI = Math.max(1, g - 1), hiI = Math.min(wl.length - 2, g + 1);
     g = loI;
     for (let k = loI + 1; k <= hiI; k++) if (y[k] > y[g]) g = k;
-    const res = measurePeakAt(wl, raw, y, g, noise);
-    if (res && (!ranged || (res.measuredPeak >= lo && res.measuredPeak <= hi))) results.push(res);
+    const m = measureAt(wl, raw, y, g, noise, 5.0);
+    if (!m || (ranged && (m.center < lo || m.center > hi))) continue;
+    results.push({
+      measuredPeak: m.center,
+      energyEv: nmToEv(m.center),
+      fwhmNm: m.hi - m.lo,
+      fwhmEv: m.lo > 0 && m.hi > 0 ? Math.abs(nmToEv(m.lo) - nmToEv(m.hi)) : NaN,
+      peakIntensity: m.height,
+      rawIntensity: m.value,
+      integratedIntensity: m.area,
+      snr: m.snr,
+      index: m.index,
+    });
   }
   results.sort((a, b) => b.peakIntensity - a.peakIntensity);
   return results.slice(0, Math.max(1, Math.floor(maxPeaks)));
+}
+
+// ---------------------------------------------------------------- energy axis (Jacobian conversion)
+
+/**
+ * Per-pixel factor from counts per pixel to counts per meV: 1 / |dE/dpixel|.
+ * This is the Jacobian |dλ/dE| = λ²/hc applied to the actual width of every pixel.
+ */
+export function perMevFactor(wl) {
+  const n = wl.length, f = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const a = Math.max(i - 1, 0), b = Math.min(i + 1, n - 1);
+    const dEmeV = (1000 * Math.abs(nmToEv(wl[b]) - nmToEv(wl[a]))) / (b - a);
+    f[i] = dEmeV > 0 ? 1 / dEmeV : NaN;
+  }
+  return f;
+}
+
+/**
+ * Spectrum on the photon-energy axis in counts per meV: the constant offset is removed first
+ * (the Jacobian applies to light, not to the detector offset), then every pixel is divided by its width in meV.
+ * x ascending in eV; idx[j] is the pixel behind sample j.
+ */
+export function energySpectrum(wl, inten) {
+  const [offset] = estimateBaseline(inten);
+  const f = perMevFactor(wl);
+  const idx = [];
+  for (let i = 0; i < wl.length; i++) if (wl[i] > 0 && Number.isFinite(f[i])) idx.push(i);
+  idx.sort((a, b) => wl[b] - wl[a]);
+  return {
+    x: Float64Array.from(idx, (i) => nmToEv(wl[i])),
+    y: Float64Array.from(idx, (i) => (inten[i] - offset) * f[i]),
+    idx, offset, factor: f,
+  };
+}
+
+/**
+ * Peaks measured on the Jacobian-converted energy spectrum. Detection is the same as findSpectralPeaks
+ * (same peaks, same SNR); centre, FWHM, height and area come from the counts-per-meV spectrum.
+ * Height is in counts/meV, area in counts.
+ */
+export function findEnergyPeaks(wavelength, intensity, options = {}) {
+  const wl = wavelength;
+  const E = energySpectrum(wl, intensity);
+  const smooth = medianFilter3(E.y);
+  const pos = new Int32Array(wl.length).fill(-1);
+  E.idx.forEach((p, j) => { pos[p] = j; });
+  const [, noisePx] = estimateBaseline(intensity);
+
+  const results = [];
+  for (const p of findSpectralPeaks(wl, intensity, options)) {
+    const j0 = pos[p.index];
+    if (j0 < 0) continue;
+    // The Jacobian shifts broad peaks to the blue: search the maximum within the half-maximum width
+    const stepNm = Math.abs(wl[Math.min(p.index + 1, wl.length - 1)] - wl[Math.max(p.index - 1, 0)]) / 2 || 1;
+    const reach = Number.isFinite(p.fwhmNm) ? Math.max(3, Math.ceil(p.fwhmNm / 2 / stepNm)) : 3;
+    let j = j0;
+    for (let k = Math.max(1, j0 - reach); k <= Math.min(E.x.length - 2, j0 + reach); k++) if (smooth[k] > smooth[j]) j = k;
+    const nm = wl[E.idx[j]];
+    const m = measureAt(E.x, E.y, E.y, j, noisePx * E.factor[E.idx[j]], (5 * HC_EV_NM) / (nm * nm));
+    if (!m) continue;
+    results.push({
+      measuredPeak: evToNm(m.center),
+      energyEv: m.center,
+      fwhmNm: m.lo > 0 && m.hi > 0 ? Math.abs(evToNm(m.lo) - evToNm(m.hi)) : NaN,
+      fwhmEv: m.hi - m.lo,
+      peakIntensity: m.height,
+      rawIntensity: m.value,
+      integratedIntensity: 1000 * m.area, // (counts/meV) x eV -> counts
+      snr: p.snr,
+      index: E.idx[j],
+    });
+  }
+  return results.sort((a, b) => b.peakIntensity - a.peakIntensity);
 }
 
 /**

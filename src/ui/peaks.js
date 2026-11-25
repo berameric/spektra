@@ -1,7 +1,7 @@
 // Peaks panel: colour-coded list of detected peaks, search scope and the selection chip above the plot.
 
 import { peakColor } from "../config.js";
-import { S, selText } from "../state.js";
+import { S, perMev, selText } from "../state.js";
 import { $, fmt, setText } from "../util.js";
 
 export function updatePeakList() {
@@ -26,15 +26,16 @@ export function updatePeakList() {
       const [num, unit] = wlText.split(" ");
       wl.innerHTML = `${num}<small>${unit}</small>`;
     }
-    const counts = p.rawIntensity.toFixed(0);
+    const counts = `${p.rawIntensity.toFixed(0)} ${perMev() ? "cts/meV" : "cts"}`;
     if (ct.dataset.v !== counts) {
       ct.dataset.v = counts;
-      ct.innerHTML = `${counts}<small>cts</small>`;
+      const [num, unit] = counts.split(" ");
+      ct.innerHTML = `${num}<small>${unit}</small>`;
     }
     const other = S.unit === "eV" ? `${fmt(p.measuredPeak, 2)} nm` : `${fmt(p.energyEv, 4)} eV`;
     const fwhm = S.unit === "eV" ? `${fmt(p.fwhmEv, 4)} eV` : `${fmt(p.fwhmNm, 2)} nm`;
     setText(sub, `${other} · FWHM ${fwhm} · SNR ${p.snr.toFixed(0)}`);
-    li.title = `${strongest ? "Strongest peak · " : ""}area ${fmt(p.integratedIntensity, 0)}`;
+    li.title = `${strongest ? "Strongest peak · " : ""}area ${fmt(p.integratedIntensity, 0)}${perMev() ? " counts" : ""}`;
   });
   setText($("peakCount"), String(S.peaks.length));
   $("peaksCsvBtn").disabled = !S.peaks.length;

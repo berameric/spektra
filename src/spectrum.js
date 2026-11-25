@@ -1,8 +1,8 @@
 // From acquired frame to screen: display unit, peak detection within the selection, and render scheduling.
 
-import { findSpectralPeaks, nmToEv } from "./analysis/peaks.js";
+import { energySpectrum, findEnergyPeaks, findSpectralPeaks, nmToEv } from "./analysis/peaks.js";
 import { AUTO_PEAKS, SATURATION } from "./config.js";
-import { S } from "./state.js";
+import { S, perMev } from "./state.js";
 import { toast } from "./ui/notify.js";
 import { updatePeakList, updateScope } from "./ui/peaks.js";
 import { createPlot, plotData, redrawPlot } from "./ui/plot.js";
@@ -10,6 +10,7 @@ import { $ } from "./util.js";
 
 function toDisplay(wl, inten) {
   if (S.unit === "nm") return { x: wl, y: inten };
+  if (S.jacobian) return energySpectrum(wl, inten);
   const idx = [];
   for (let i = 0; i < wl.length; i++) if (wl[i] > 0) idx.push(i);
   idx.sort((a, b) => wl[b] - wl[a]); // ascending energy
@@ -23,7 +24,8 @@ function analyze() {
   S.peaks = [];
   S.mainPeak = -1;
   if (S.detect) {
-    S.peaks = findSpectralPeaks(f.wl, f.inten, { ...AUTO_PEAKS, ...range })
+    const find = perMev() ? findEnergyPeaks : findSpectralPeaks;
+    S.peaks = find(f.wl, f.inten, { ...AUTO_PEAKS, ...range })
       .sort((a, b) => a.measuredPeak - b.measuredPeak);
     S.peaks.forEach((p, i) => {
       if (S.mainPeak < 0 || p.peakIntensity > S.peaks[S.mainPeak].peakIntensity) S.mainPeak = i;
@@ -57,10 +59,21 @@ export function setDetect(on) {
 
 export function setUnit(unit) {
   S.unit = unit;
+  redisplay(false);
+}
+
+export function setJacobian(on) {
+  S.jacobian = on;
+  if (S.unit === "eV") redisplay(true);
+}
+
+/** Recompute the displayed spectrum and its peaks after the axis or its intensity unit changed. */
+function redisplay(keepX) {
+  S.yRange = null;
   if (S.frame) S.disp = toDisplay(S.frame.wl, S.frame.inten);
-  createPlot(false);
+  createPlot(keepX, false); // the intensity unit may have changed
   reanalyze();
-  requestRender(!!S.frame);
+  requestRender(!keepX && !!S.frame);
 }
 
 /** Show a newly acquired frame. */

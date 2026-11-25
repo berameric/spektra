@@ -3,7 +3,7 @@
 
 import { peakExtent, evToNm, nmToEv } from "../analysis/peaks.js";
 import { DEFAULT_RANGE, peakColor } from "../config.js";
-import { S, dispRange, fromDisp, toDisp } from "../state.js";
+import { S, dispRange, fromDisp, intensityUnit, toDisp } from "../state.js";
 import { $, clamp, cssVar, fmt, withAlpha } from "../util.js";
 
 let u = null;
@@ -25,11 +25,11 @@ function plainTicks(_u, splits, _axis, _space, incr) {
   return splits.map((v) => v.toFixed(d));
 }
 
-/** (Re)build the plot, e.g. after a theme or unit change; `keepView` keeps the current zoom. */
-export function createPlot(keepView) {
+/** (Re)build the plot, e.g. after a theme or unit change; `keepX` / `keepY` keep the current zoom. */
+export function createPlot(keepX, keepY = keepX) {
   const el = $("plot");
-  const prevX = keepView && u ? [u.scales.x.min, u.scales.x.max] : null;
-  const prevY = keepView && u ? [u.scales.y.min, u.scales.y.max] : null;
+  const prevX = keepX && u ? [u.scales.x.min, u.scales.x.max] : null;
+  const prevY = keepY && u ? [u.scales.y.min, u.scales.y.max] : null;
   if (u) u.destroy();
   C = {
     muted: cssVar("--muted"), grid: cssVar("--grid"), panel: cssVar("--panel"), hl: cssVar("--hl"),
@@ -47,7 +47,7 @@ export function createPlot(keepView) {
     series: [{}, { stroke: C.trace, width: 1.25, points: { show: false } }],
     axes: [
       { ...axis, label: S.unit === "eV" ? "Photon energy (eV)" : "Wavelength (nm)", labelSize: 22 },
-      { ...axis, label: "Intensity (counts)", size: 64, labelSize: 22 },
+      { ...axis, label: `Intensity (${intensityUnit()})`, size: 64, labelSize: 22 },
     ],
     cursor: { drag: { x: true, y: false, setScale: false, dist: 4 }, points: { show: false } },
     hooks: { draw: [drawOverlays], setSelect: [onSelect], setCursor: [onCursor] },
@@ -164,7 +164,7 @@ function onCursor(u) {
   const pos = S.unit === "eV"
     ? `${xv.toFixed(3)} eV  (${fmt(evToNm(xv), 2)} nm)`
     : `${xv.toFixed(2)} nm  (${fmt(nmToEv(xv), 3)} eV)`;
-  $("cursorRo").textContent = yv == null ? pos : `${pos}  ·  ${yv.toFixed(0)} counts`;
+  $("cursorRo").textContent = yv == null ? pos : `${pos}  ·  ${yv.toFixed(0)} ${intensityUnit()}`;
 }
 
 // ---------------------------------------------------------------- mouse gestures

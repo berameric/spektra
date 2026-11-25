@@ -11,6 +11,7 @@ export const S = {
   disp: null,  // {x, y} in the display unit, x ascending
   sel: null,   // selected range {lo, hi} in nm; never stored
   detect: false,
+  jacobian: true, // on the eV axis: counts per meV (I·λ²/hc) instead of counts per pixel
   peaks: [],    // detected peaks, ascending wavelength
   mainPeak: -1, // index of the strongest detected peak
   yRange: null,
@@ -22,6 +23,10 @@ export const dispRange = (loNm, hiNm) => {
   const a = toDisp(loNm), b = toDisp(hiNm);
   return a < b ? [a, b] : [b, a];
 };
+
+/** eV axis with the Jacobian conversion: intensities are counts per meV. */
+export const perMev = () => S.unit === "eV" && S.jacobian;
+export const intensityUnit = () => (perMev() ? "counts/meV" : "counts");
 
 /** The selected range as text in the display unit. */
 export function selText() {

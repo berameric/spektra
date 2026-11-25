@@ -4,7 +4,7 @@
 import { acquireOnce, applyIntegration, clearDark, connect, takeDark, toggleLive, watchDevice } from "./acquisition.js";
 import { INT_STEPS, MAX_INT_MS, MIN_INT_MS } from "./config.js";
 import { exportPeaks, exportSpectrum } from "./export.js";
-import { clearSelection, reanalyze, requestRender, setDetect, setSelection, setUnit } from "./spectrum.js";
+import { clearSelection, reanalyze, requestRender, setDetect, setJacobian, setSelection, setUnit } from "./spectrum.js";
 import { S } from "./state.js";
 import { initPopovers, updateChain, updateUi } from "./ui/controls.js";
 import { checkEnvironment, initEnvironment } from "./ui/environment.js";
@@ -64,6 +64,11 @@ $("unitSeg").addEventListener("click", (e) => {
   document.querySelectorAll("#unitSeg button").forEach((b) => b.classList.toggle("on", b.dataset.unit === unit));
   setUnit(unit);
   updateChain();
+});
+$("jacobianChk").addEventListener("change", (e) => {
+  setJacobian(e.target.checked);
+  updateChain();
+  toast(e.target.checked ? "Jacobian on — intensity in counts per meV" : "Jacobian off — counts per pixel on the eV axis", "info", 3000, "jacobian");
 });
 $("autoY").addEventListener("change", () => { S.yRange = null; updateChain(); requestRender(); });
 

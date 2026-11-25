@@ -141,10 +141,12 @@
   <div class="row"><span class="label">X axis</span>
     <div class="seg" id="unitSeg"><button data-unit="nm" class="on">nm</button><button data-unit="eV">eV</button></div>
   </div>
+  <div class="row" id="jacobianRow" hidden><label class="switch"><input type="checkbox" id="jacobianChk" checked><span></span>Jacobian conversion</label></div>
+  <p id="jacobianNote" hidden>Intensity per meV: I(E) = I(λ)·λ²/hc, after removing the constant detector offset. Peak positions, widths and areas are measured on this spectrum.</p>
   <div class="row"><label class="switch"><input type="checkbox" id="autoY" checked><span></span>Auto-scale Y</label></div>
 </div>
 <div popover class="pop menu" id="exportPop">
-  <button id="csvBtn"><svg class="i"><use href="#i-dl"/></svg><span>Spectrum<small>Every pixel: wavelength, energy, intensity</small></span></button>
+  <button id="csvBtn"><svg class="i"><use href="#i-dl"/></svg><span>Spectrum<small>Every pixel: wavelength, energy, counts, counts/meV</small></span></button>
   <button id="peaksCsvBtn"><svg class="i"><use href="#i-dl"/></svg><span>Peaks<small>The detected peaks in the list</small></span></button>
 </div>
 <div popover class="pop help" id="helpPop">
