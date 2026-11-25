@@ -13,7 +13,7 @@ export const INT_TIME_MAX_US = 10_000_000;
 
 // OBP message types
 const GET_SERIAL = 0x00000100;
-const GET_RAW_SPECTRUM_HDX = 0x00101000;
+const GET_SPECTRUM = 0x00101000; // the only spectrum message on the HDX (0x00101100 → error 2); no dark correction applied
 const SET_ITIME_USEC = 0x00110010;
 const GET_WL_COEFF_COUNT = 0x00180100;
 const GET_WL_COEFF = 0x00180101;
@@ -292,7 +292,7 @@ export class HDXUSB {
   async intensities() {
     // A lost reply is resent after this timeout, so keep the margin short: measured replies
     // arrive within the exposure time + a few ms.
-    const raw = await this._query(GET_RAW_SPECTRUM_HDX, undefined, Math.floor(this.intUs / 1000) + 300);
+    const raw = await this._query(GET_SPECTRUM, undefined, Math.floor(this.intUs / 1000) + 300);
     const need = HDX_PIXELS * 2;
     if (raw.length < need) throw new HDXError(`Short spectrum: ${raw.length} bytes, expected ${need}`);
     // Any metadata precedes the pixel data

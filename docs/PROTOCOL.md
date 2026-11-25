@@ -65,13 +65,25 @@ receive buffer is discarded and the request is repeated (Section 4).
 | `0x00180100` | number of wavelength coefficients | — | one byte, *n* |
 | `0x00180101` | wavelength coefficient *i* | one byte, *i* | 32-bit float |
 | `0x00110010` | set integration time | 32-bit unsigned integer, µs (6 000 – 10 000 000) | acknowledgement |
-| `0x00101000` | raw spectrum | — | 2 068 pixels × 16-bit unsigned integer, preceded by optional metadata |
+| `0x00101000` | spectrum | — | 2 068 pixels × 16-bit unsigned integer, preceded by optional metadata |
 
 **Wavelength calibration.** The instrument stores the coefficients of a polynomial in the pixel index *p*.
 Spektra reads the *n* coefficients *c*ᵢ at connection and computes λ(*p*) = Σᵢ *c*ᵢ *p*ⁱ for *p* = 0 … 2067.
 
 **Spectrum.** The pixel data are the last 4 136 bytes of the reply payload; any bytes before them are metadata
 and are ignored. A shorter payload is reported as an error.
+
+In OBP documentation for other Ocean Insight instruments, `0x00101000` returns a *corrected* and `0x00101100` a
+*raw* spectrum. On the HDX we tested (25 November 2026, with the read-only `?diag` page):
+
+- `0x00101100` is not available: the instrument answers with error 2, "unknown message type". `0x00101000` is
+  the only spectrum message.
+- The reply carries no metadata (4 136 bytes, pixel data only).
+- The values include the detector offset: the lowest pixels read about 1 400 counts and the first and last 20
+  pixels average 1 900–2 300 counts, where a dark-corrected spectrum would be near zero. The instrument therefore
+  applies no dark correction; Spektra's dark subtraction is needed and not applied twice.
+- Whether the instrument applies a nonlinearity correction is not documented and was not determined by this
+  test.
 
 **Integration time.** Sent with the acknowledgement flag set, so the instrument confirms the change before the
 next spectrum is requested.

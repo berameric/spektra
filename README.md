@@ -85,7 +85,7 @@ Spektra does not depend on the manufacturer's driver, SDK or application softwar
 the Ocean Binary Protocol (OBP), a framed binary message protocol carried over USB bulk transfers, which
 Spektra implements in JavaScript ([`src/device/hdx-usb.js`](src/device/hdx-usb.js)). The implementation reads the
 serial number and the wavelength calibration stored in the instrument, sets the integration time and acquires
-raw 16-bit spectra of 2 068 pixels. Because over some USB connections (for example through a hub) the
+16-bit spectra of 2 068 pixels. Because over some USB connections (for example through a hub) the
 instrument occasionally loses or repeats a reply, replies are matched to requests by message type and requests
 are repeated after a timeout.
 
