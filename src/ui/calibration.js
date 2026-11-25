@@ -13,6 +13,8 @@ import { toast } from "./notify.js";
 // Calibration needs every usable line, also weak ones next to strong ones
 const CAL_PEAKS = { maxPeaks: 120, minSnr: 5, minProminenceFrac: 0.002, minDistanceNm: 0.8 };
 const WEAK_SNR = 15;
+// Reference lines are narrow; broad bands (LED phosphor, photoluminescence) and noise ripples on top of them are not
+const MAX_LINE_FWHM_NM = 5;
 const KIND = ["offset", "linear", "quadratic"];
 
 let rows = []; // matched lines: { reference, measured, snr, saturated, outlier, use }
@@ -101,7 +103,7 @@ function findLines() {
     : "Lines are matched to the nearest peaks; give at least two for a scale correction.");
   if (S.frame && lines.length) {
     const wl = S.factoryWl;
-    const peaks = findSpectralPeaks(wl, S.frame.inten, CAL_PEAKS).map((p) => ({
+    const peaks = findSpectralPeaks(wl, S.frame.inten, CAL_PEAKS).filter((p) => p.fwhmNm < MAX_LINE_FWHM_NM).map((p) => ({
       nm: p.measuredPeak, height: p.peakIntensity, snr: p.snr, saturated: S.frame.raw[p.index] >= satLevel(),
     }));
     const single = lines.length === 1;
@@ -135,7 +137,7 @@ function render() {
   if (!S.frame) {
     $("calSum").textContent = "No spectrum on screen: start Live or press Acquire with the lamp on.";
   } else if (!rows.length) {
-    $("calSum").textContent = "No lines of this source found. Check the source, and that its lines are not saturated.";
+    $("calSum").textContent = "No lines of this source found. A white LED has no narrow lines; check the source, and that its lines are not saturated.";
   } else if (!fit) {
     $("calSum").textContent = "Tick at least one line.";
   } else {
