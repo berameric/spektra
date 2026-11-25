@@ -1,6 +1,6 @@
 // Start-up system check: detects the OS and browser and explains what is still needed to reach the HDX.
 
-import { STORE_ENV } from "../config.js";
+import { MOCK, STORE_ENV } from "../config.js";
 import { HDXUSB } from "../device/hdx-usb.js";
 import { $, store } from "../util.js";
 
@@ -65,6 +65,7 @@ export function checkEnvironment(force = false) {
   const env = detectPlatform();
   const notes = environmentNotes(env);
   const blocking = notes.some((n) => n.level === "block");
+  if (MOCK && !force) return; // simulated HDX: nothing to set up
   if (!force && (!notes.length || (!blocking && store.get(STORE_ENV) === "1"))) return;
   $("envSystem").textContent = `${env.browser} on ${env.os}`;
   $("envList").innerHTML = notes.length
@@ -72,12 +73,18 @@ export function checkEnvironment(force = false) {
     : "<li class=\"env-ready\"><h4>Ready</h4><p>This browser supports WebUSB and this system needs no driver. Plug in the HDX and press Connect.</p></li>";
   $("envTitle").textContent = blocking ? "This browser cannot connect to the HDX" : notes.length ? "Before you connect" : "System check";
   $("envHideRow").hidden = blocking || !notes.length;
+  // A browser that cannot reach the HDX at all: the notice stays until the page is opened elsewhere
+  $("envDlg").dataset.blocking = blocking ? "1" : "";
+  $("envActions").hidden = blocking;
   $("envDlg").showModal();
 }
 
 export function initEnvironment() {
-  $("envDlg").addEventListener("close", () => {
-    if ($("envHide").checked) store.set(STORE_ENV, "1");
+  const dlg = $("envDlg");
+  dlg.addEventListener("cancel", (e) => { if (dlg.dataset.blocking) e.preventDefault(); });
+  dlg.addEventListener("close", () => {
+    if (dlg.dataset.blocking) setTimeout(() => dlg.showModal()); // Esc pressed twice still closes a dialog in Chrome
+    else if ($("envHide").checked) store.set(STORE_ENV, "1");
   });
   $("envOpen").addEventListener("click", () => { $("helpPop").hidePopover(); checkEnvironment(true); });
 }
