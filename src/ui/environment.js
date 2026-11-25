@@ -21,10 +21,11 @@ function detectPlatform() {
 /** What this computer and browser still need before the HDX can be used. */
 function environmentNotes({ os, browser }) {
   const notes = [];
-  if (os === "iOS" || os === "Android") {
+  if (os === "iOS") {
+    // Every iOS browser is WebKit, which has no WebUSB
     notes.push({
-      level: "block", title: "Use a desktop or laptop computer",
-      html: `<p>The HDX connects over USB to a computer. ${os} browsers cannot open USB devices from a web page.</p>`,
+      level: "block", title: "Use a computer or an Android device",
+      html: "<p>Browsers on iPhone and iPad cannot open USB devices from a web page.</p>",
     });
   } else if (!HDXUSB.supported()) {
     notes.push({
@@ -38,6 +39,13 @@ function environmentNotes({ os, browser }) {
       level: "block", title: "Open the page over HTTPS",
       html: "<p>WebUSB works only on <code>https://</code> pages or on <code>http://localhost</code>. "
         + "Use the published HTTPS address, or serve the folder locally.</p>",
+    });
+  }
+  if (os === "Android" && HDXUSB.supported()) {
+    notes.push({
+      level: "setup", title: "Android: connect over USB OTG (not yet tested)",
+      html: "<p>Use a USB-C (OTG) adapter or cable. The phone or tablet has to power the HDX over USB; "
+        + "if it does not show up, try a powered USB hub. Spektra has been tested on computers only so far.</p>",
     });
   }
   if (os === "Windows") {

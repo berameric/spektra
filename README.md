@@ -29,7 +29,8 @@ On first start Spektra checks your system and tells you if anything below is sti
 | ChromeOS | None |
 | Windows | Install the WinUSB driver once (see below) |
 | Linux | Add a udev rule once (see below) |
-| Android, iOS | Not supported |
+| Android | Chrome, over a USB-C (OTG) adapter; the device must power the HDX — not yet tested |
+| iOS | Not supported (no WebUSB in any iOS browser) |
 
 ### Windows
 
@@ -56,7 +57,7 @@ context (`https://` or `http://localhost`).
 
 | Browser | Supported |
 |---|---|
-| Chrome | ✅ 61+ |
+| Chrome | ✅ 61+ (desktop and Android) |
 | Edge | ✅ 79+ |
 | Opera | ✅ 48+ |
 | Firefox | ❌ |
