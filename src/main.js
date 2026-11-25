@@ -9,7 +9,8 @@ import { S } from "./state.js";
 import { initPopovers, parseExposure, showExposure, showGuide, updateChain, updateUi } from "./ui/controls.js";
 import { initHints } from "./ui/hints.js";
 import { initPeakTable, markRows, peakTableText } from "./ui/peaks.js";
-import { initRail } from "./ui/rail.js";
+import { initRail, setRailCollapsed } from "./ui/rail.js";
+import { initMobile, isCompact } from "./ui/mobile.js";
 import { checkEnvironment, initEnvironment } from "./ui/environment.js";
 import { toast } from "./ui/notify.js";
 import { initPlot, redrawPlot, resetView, zoomToPeak, zoomToSelection } from "./ui/plot.js";
@@ -28,6 +29,7 @@ function setHoverPeak(i) {
 
 initPlot({ setSelection, clearSelection, reanalyze, hoverPeak: setHoverPeak });
 initRail();
+initMobile(() => setRailCollapsed(true)); // phones start with the peaks drawer closed
 initPopovers();
 initHints();
 initPeakTable({
@@ -40,6 +42,7 @@ initPeakTable({
       S.focusPeak = i;
       zoomToPeak(S.peaks[i]);
       markRows();
+      if (isCompact()) setRailCollapsed(true); // the drawer covers the plot: close it to show the peak
     }
     redrawPlot();
   },

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Spektra — HDX Spectrometer</title>
 <meta name="description" content="Free, open-source browser software for the Ocean Insight (Ocean Optics) HDX spectrometer: live spectra, automatic peak detection, nm and eV axes, CSV export. Connects over WebUSB, nothing to install.">
 <meta name="theme-color" content="#131313">
@@ -32,6 +32,9 @@
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></symbol>
   <symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v6"/><path d="M8 11h6"/></symbol>
   <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+  <symbol id="i-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></symbol>
+  <symbol id="i-minimize" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></symbol>
+  <symbol id="i-rotate" viewBox="0 0 24 24"><rect width="12" height="20" x="6" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
   <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
@@ -56,12 +59,12 @@
       <span class="sim-badge" id="simBadge" hidden title="Development mode (?mock): a simulated HDX replaces the USB device">SIMULATED</span>
       <button class="conn-x" id="disconnectBtn" hidden title="Disconnect the HDX" aria-label="Disconnect the HDX"><svg class="i"><use href="#i-unplug"/></svg></button>
     </div>
-    <button id="connectBtn" class="btn primary"><svg class="i"><use href="#i-plug"/></svg>Connect HDX</button>
+    <button id="connectBtn" class="btn primary"><svg class="i"><use href="#i-plug"/></svg>Connect<span class="lbl"> HDX</span></button>
   </div>
 
   <div class="bar-zone bar-center" role="group" aria-label="Measurement">
     <div class="group">
-      <button id="acqBtn" class="btn" title="Take a single spectrum"><svg class="i"><use href="#i-camera"/></svg>Acquire</button>
+      <button id="acqBtn" class="btn" title="Take a single spectrum (A)" aria-label="Acquire"><svg class="i"><use href="#i-camera"/></svg><span class="lbl">Acquire</span></button>
       <button id="liveBtn" class="btn primary live">
         <svg class="i i-play"><use href="#i-play"/></svg><svg class="i i-stop"><use href="#i-stop"/></svg><span id="liveLabel">Live</span>
       </button>
@@ -102,7 +105,8 @@
   </div>
 
   <div class="bar-zone bar-right">
-    <button class="btn" id="exportBtn" popovertarget="exportPop"><svg class="i"><use href="#i-dl"/></svg>Export<svg class="i"><use href="#i-down"/></svg></button>
+    <button class="btn icon fs-btn" id="fsBtn" title="Full screen" aria-label="Full screen"><svg class="i"><use id="fsIcon" href="#i-maximize"/></svg></button>
+    <button class="btn" id="exportBtn" popovertarget="exportPop" aria-label="Export"><svg class="i"><use href="#i-dl"/></svg><span class="lbl">Export</span><svg class="i lbl"><use href="#i-down"/></svg></button>
   </div>
 </header>
 
@@ -135,7 +139,7 @@
         <button id="selZoom" title="Zoom to the selection" aria-label="Zoom to the selection"><svg class="i"><use href="#i-zoom"/></svg></button>
         <button id="selClear" title="Clear selection (Esc)" aria-label="Clear selection"><svg class="i"><use href="#i-x"/></svg></button>
       </span>
-      <button class="btn ghost small hold" id="holdBtn" title="Hold this spectrum as a dashed reference curve (H)"><svg class="i"><use href="#i-pin"/></svg><span id="holdLabel">Hold</span></button>
+      <button class="btn ghost small hold" id="holdBtn" title="Hold this spectrum as a dashed reference curve (H)"><svg class="i"><use href="#i-pin"/></svg><span id="holdLabel" class="lbl">Hold</span></button>
       <button class="btn ghost small icon" popovertarget="helpPop" title="Plot controls" aria-label="Plot controls"><svg class="i"><use href="#i-help"/></svg></button>
       <button class="btn ghost small icon" id="resetView" title="Reset view (double-click)" aria-label="Reset view"><svg class="i"><use href="#i-reset"/></svg></button>
     </div>
@@ -304,6 +308,15 @@
   </form>
 </dialog>
 <div id="toasts" aria-live="polite"></div>
+<!-- Phones: Spektra needs a landscape screen -->
+<div class="rotate" id="rotate">
+  <div>
+    <svg class="i rotate-icon"><use href="#i-rotate"/></svg>
+    <b>Turn your phone sideways</b>
+    <p>Spektra needs the width of a landscape screen.</p>
+    <button class="btn primary" id="rotateFs"><svg class="i"><use href="#i-maximize"/></svg>Full screen, landscape</button>
+  </div>
+</div>
 
 <script src="vendor/uplot/uPlot.iife.min.js"></script>
 <script type="module" src="src/main.js"></script>

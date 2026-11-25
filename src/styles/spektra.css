@@ -245,7 +245,7 @@ input[type="number"], input[type="text"] {
 .btn.hold.on { background: var(--panel-2); border-color: var(--border-strong); }
 .btn.hold.on svg.i { fill: currentColor; }
 .help-sub { margin-top: 14px !important; }
-.plot .u-over { cursor: crosshair; }
+.plot .u-over { cursor: crosshair; touch-action: none; }
 .plot-empty {
   position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; padding: 16px;
 }
@@ -473,19 +473,79 @@ dialog .actions { align-items: center; }
 @media (max-width: 1100px) {
   .brand span { display: none; }
 }
+/* Narrow desktop windows (phones use the compact layout below instead) */
 @media (max-width: 900px) {
-  body { height: auto; min-height: 100%; }
-  .panel-bar { padding: 8px 16px; }
-  .vr { display: none; }
-  .work { grid-template-columns: minmax(0, 1fr); align-content: start; background: var(--panel); }
-  #scanInfo { display: none; }
-  .plot-pane { height: 440px; }
-  .rail { border-left: 0; border-top: 1px solid var(--border); max-height: 420px; }
-  .work.rail-collapsed { grid-template-columns: minmax(0, 1fr); }
-  .rail-resize, #railCollapse, .work.rail-collapsed .rail-strip { display: none; }
-  .work.rail-collapsed .rail-body { display: flex; }
-  #cursorRo { display: none; }
-  .sig-pct { display: none; }
-  .hint { left: 16px; max-width: calc(100% - 32px); }
-  #toasts { left: 16px; right: 16px; transform: none; }
+  html:not(.compact) body { height: auto; min-height: 100%; }
+  html:not(.compact) .panel-bar { padding: 8px 16px; }
+  html:not(.compact) .vr { display: none; }
+  html:not(.compact) .work { grid-template-columns: minmax(0, 1fr); align-content: start; background: var(--panel); }
+  html:not(.compact) #scanInfo { display: none; }
+  html:not(.compact) .plot-pane { height: 440px; }
+  html:not(.compact) .rail { border-left: 0; border-top: 1px solid var(--border); max-height: 420px; }
+  html:not(.compact) .work.rail-collapsed { grid-template-columns: minmax(0, 1fr); }
+  html:not(.compact) .rail-resize, html:not(.compact) #railCollapse, html:not(.compact) .work.rail-collapsed .rail-strip { display: none; }
+  html:not(.compact) .work.rail-collapsed .rail-body { display: flex; }
+  html:not(.compact) #cursorRo { display: none; }
+  html:not(.compact) .sig-pct { display: none; }
+  html:not(.compact) .hint { left: 16px; max-width: calc(100% - 32px); }
+  html:not(.compact) #toasts { left: 16px; right: 16px; transform: none; }
 }
+
+/* ---- phones: compact landscape layout (class set by ui/mobile.js) ---- */
+.fs-btn, .rotate { display: none; }
+html.compact { touch-action: manipulation; }
+html.compact body { height: 100dvh; overflow: hidden; padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left); }
+.compact .fs-btn { display: inline-flex; }
+.compact .panel-bar { padding: 5px 8px; gap: 6px; flex-wrap: nowrap; }
+.compact .sig-tip { left: auto; right: -40px; width: min(330px, 80vw); }
+@media (max-width: 860px) { .compact .sig > b { display: none; } }
+.compact .bar-zone { gap: 6px; }
+.compact .bar-center { gap: 8px; }
+.compact .brand span, .compact .panel-bar .label, .compact .lbl, .compact #devSerial, .compact .sig-pct,
+.compact .sim-badge, .compact .panel-bar .vr { display: none; }
+.compact .btn { height: 30px; padding: 0 10px; }
+.compact .btn.icon, .compact #acqBtn, .compact #exportBtn, .compact .btn.hold { width: 32px; padding: 0; }
+.compact .btn.live { min-width: 0; }
+.compact .conn { height: 30px; padding: 0 10px; }
+.compact .conn:not(.on) { display: none; } /* the Connect button says it */
+.compact .conn.on { padding-right: 3px; }
+.compact .expo-box { height: 30px; }
+.compact .expo-val input { width: 40px; }
+.compact .expo-auto { padding: 0 8px; }
+.compact .sig { gap: 6px; }
+.compact .pane-head { height: 38px; padding: 0 6px 0 8px; gap: 6px; }
+.compact .pane-head .opt .tip-btn, .compact #cursorRo, .compact #scanInfo { display: none; }
+.compact .plot-wrap { padding: 2px 4px 0 0; }
+.compact .plot { inset: 2px 4px 0 0; }
+.compact .hint { display: none; }
+.compact .guide { padding: 12px 14px 8px; max-height: 100%; overflow: auto; }
+.compact .guide li { padding: 6px 0; }
+.compact .chain { padding: 3px 6px; }
+.compact .chain .label, .compact .chain-sum, .compact .chain > .vr, .compact .foot-link { display: none; }
+.compact .stage { height: 28px; }
+.compact #toasts { bottom: 42px; gap: 4px; }
+.compact .toast { padding: 6px 11px; font-size: 12px; border-radius: 8px; gap: 8px; max-width: min(420px, calc(100vw - 32px)); }
+.compact .toast::before { width: 6px; height: 6px; margin-top: 5px; }
+.compact .plot-wrap.zoomed .plot { bottom: 32px; }
+.compact .overview { bottom: 4px; height: 24px; }
+/* Peaks: a strip at the right edge that opens as a drawer over the plot */
+.compact .work, .compact .work.rail-collapsed { position: relative; grid-template-columns: minmax(0, 1fr) 40px; }
+.compact .rail-resize { display: none; }
+.compact .work:not(.rail-collapsed) .rail {
+  position: absolute; z-index: 15; top: 0; right: 0; bottom: 0; width: min(440px, 64vw);
+  box-shadow: -14px 0 28px rgba(0, 0, 0, .5);
+}
+.compact .rail .pane-head { padding: 0 6px 0 12px; }
+.compact .peak-table th:first-child button, .compact .peak-table td:first-child { padding-left: 12px; }
+.compact .rail-foot { display: none; }
+/* Upright phone: only the turn-sideways screen (the bar would not fit and widen the page) */
+.compact.portrait body > :not(.rotate):not(dialog) { display: none !important; }
+.compact.portrait .rotate {
+  display: grid; place-items: center; position: fixed; inset: 0; z-index: 100; padding: 24px; text-align: center;
+  background: var(--bg);
+}
+.rotate b { display: block; font-size: 17px; margin: 14px 0 6px; }
+.rotate p { margin: 0 0 20px; color: var(--muted); }
+.rotate-icon { width: 44px; height: 44px; stroke-width: 1.5; color: var(--muted); animation: turn 2.4s ease-in-out infinite; }
+@keyframes turn { 0%, 35% { transform: rotate(0); } 55%, 90% { transform: rotate(-90deg); } 100% { transform: rotate(0); } }
+@media (prefers-reduced-motion: reduce) { .rotate-icon { animation: none; } }

@@ -4,6 +4,7 @@
 import { peakColor } from "../config.js";
 import { S, perMev, selText } from "../state.js";
 import { $, fmt, setText } from "../util.js";
+import { isCompact } from "./mobile.js";
 
 /** Areas span many decades: full digits up to 99 999, then three significant figures. */
 const fmtArea = (v) => (!Number.isFinite(v) ? "—" : Math.abs(v) < 1e5 ? v.toFixed(0) : v.toExponential(2).replace("e+", "e"));
@@ -145,7 +146,7 @@ export function updateScope() {
     scope.innerHTML = `Searching <span class="sel-tag"><b class="mono">${selText()}</b>`
       + '<button data-act="clear-sel" title="Search the whole spectrum (Esc)" aria-label="Clear the selection"><svg class="i"><use href="#i-x"/></svg></button></span>';
   } else {
-    scope.innerHTML = "Searching the <b>whole spectrum</b> · drag on the plot to narrow it";
+    scope.innerHTML = `Searching the <b>whole spectrum</b> · ${isCompact() ? "tap a peak" : "drag on the plot"} to narrow it`;
   }
 
   $("selChip").hidden = !S.sel;

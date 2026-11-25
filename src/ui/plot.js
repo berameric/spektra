@@ -1,6 +1,7 @@
 // Spectrum plot (uPlot): axes, linear or log intensity, a held reference
 // curve, cursor readout and mouse gestures. Overlays are drawn in plot-overlays.js, the overview in overview.js.
 // Mouse: drag = select range, click = whole peak, edge drag, shift-drag pan, wheel zoom, double-click reset.
+// Touch: one finger pans, two fingers pinch-zoom, tap = whole peak, double tap = reset.
 
 import { peakExtent, evToNm, nmToEv } from "../analysis/peaks.js";
 import { DEFAULT_RANGE, loadPeakColors } from "../config.js";
@@ -328,6 +329,8 @@ function installInteractions(plot) {
     setX(xv - (xv - min) * f, xv + (max - xv) * f);
   }, { passive: false });
 
+  installTouch(plot);
+
   // Listeners on window outlive a re-created plot; replace the previous ones
   window.removeEventListener("mousemove", installInteractions.move);
   window.removeEventListener("mouseup", installInteractions.up);
@@ -335,6 +338,59 @@ function installInteractions(plot) {
   installInteractions.up = onUp;
   window.addEventListener("mousemove", onMove);
   window.addEventListener("mouseup", onUp);
+}
+
+/** Touch gestures on the plot. preventDefault keeps the page still and stops emulated mouse events. */
+function installTouch(plot) {
+  const over = plot.over;
+  const xOf = (t) => t.clientX - over.getBoundingClientRect().left;
+  let g = null, lastTap = { t: 0, x: -99 };
+
+  const begin = (e) => {
+    const { min, max } = plot.scales.x;
+    if (e.touches.length >= 2) {
+      const a = xOf(e.touches[0]), b = xOf(e.touches[1]);
+      g = { kind: "pinch", d0: Math.max(Math.abs(a - b), 20), anchor: plot.posToVal((a + b) / 2, "x"), min, max };
+    } else if (e.touches.length === 1) {
+      g = { kind: "pan", x0: xOf(e.touches[0]), min, max, moved: false, t0: performance.now(), fresh: !g };
+    } else g = null;
+  };
+
+  over.addEventListener("touchstart", (e) => { e.preventDefault(); begin(e); }, { passive: false });
+  over.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    if (!g) return;
+    const W = over.clientWidth;
+    if (g.kind === "pan" && e.touches.length === 1) {
+      const dx = xOf(e.touches[0]) - g.x0;
+      if (Math.abs(dx) > 6) g.moved = true;
+      if (!g.moved) return;
+      const dv = (dx * (g.max - g.min)) / W;
+      setX(g.min - dv, g.max - dv);
+    } else if (g.kind === "pinch" && e.touches.length >= 2) {
+      const a = xOf(e.touches[0]), b = xOf(e.touches[1]);
+      const w = ((g.max - g.min) * g.d0) / Math.max(Math.abs(a - b), 20);
+      const min = g.anchor - ((a + b) / 2 / W) * w;
+      setX(min, min + w);
+    }
+  }, { passive: false });
+  over.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    // A quick touch that did not move, and was not the end of a pinch, is a tap
+    if (g?.kind === "pan" && g.fresh && !g.moved && performance.now() - g.t0 < 350 && e.touches.length === 0) {
+      const now = performance.now();
+      if (now - lastTap.t < 320 && Math.abs(g.x0 - lastTap.x) < 30) {
+        resetView();
+        lastTap = { t: 0, x: -99 };
+      } else {
+        handleClick(g.x0);
+        lastTap = { t: now, x: g.x0 };
+      }
+    }
+    if (e.touches.length) begin(e); // a finger lifted from a pinch: carry on panning
+    else g = null;
+  }, { passive: false });
+  over.addEventListener("touchcancel", () => { g = null; });
 }
 
 function onSelect(plot) {

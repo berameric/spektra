@@ -43,9 +43,9 @@ function environmentNotes({ os, browser }) {
   }
   if (os === "Android" && HDXUSB.supported()) {
     notes.push({
-      level: "setup", title: "Android: connect over USB OTG (not yet tested)",
+      level: "setup", title: "Android: connect over USB OTG",
       html: "<p>Use a USB-C (OTG) adapter or cable. The phone or tablet has to power the HDX over USB; "
-        + "if it does not show up, try a powered USB hub. Spektra has been tested on computers only so far.</p>",
+        + "if it does not show up, try a powered USB hub. Hold the phone sideways.</p>",
     });
   }
   if (os === "Windows") {
