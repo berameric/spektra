@@ -87,7 +87,7 @@ export function setDarkStatus(text, kind, short) {
   el.className = `status-line ${kind}`;
   $("darkStage").textContent = short;
   // Phone strip: one short word under the icon
-  $("darkShort").textContent = { none: "—", subtracted: "on" }[short] ?? short.replace("measuring ", "");
+  $("darkShort").textContent = { subtracted: "on" }[short] ?? short.replace("measuring ", "");
   $("darkDot").className = `dot ${kind}`;
 }
 
