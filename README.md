@@ -13,24 +13,32 @@ Application: <https://berameric.github.io/spektra/> · Version 2.0.0 ([changelog
 
 *Figure 1. Spektra on a computer, with simulated data.*
 
-## Why Spektra
+## Aims
 
-A spectrometer is usually tied to the computer it was set up on: the manufacturer's application, its USB
-driver and often an SDK have to be installed there, and taking a quick measurement on another computer, a
-laptop in the lab or a phone means repeating that set-up, if the system is supported at all. Writing your own
-acquisition code means learning the instrument's protocol or a vendor library first.
+Laboratory spectrometers are normally operated through the manufacturer's software: an application, a USB
+driver and often a programming library, installed on a particular computer and supported on particular
+operating systems. The measurement thereby depends on software that cannot be inspected, whose processing of
+the data is not documented in full, and which ties the instrument to the computers where it is installed.
 
-Spektra removes these steps. It speaks the instrument's protocol itself, inside the browser, so nothing from
-the manufacturer is needed: open the page, connect the spectrometer and measure. (Windows and Linux still need
-a one-time permission step for USB access, described under [Platform requirements](#platform-requirements).)
+Spektra is an attempt to remove that dependence. Its aims are:
 
-There are two ways to use it:
+1. **Independence from vendor software.** The instrument's communication protocol is implemented openly and
+   documented ([docs/PROTOCOL.md](docs/PROTOCOL.md)), so that an instrument can be operated, and its behaviour
+   examined, without the manufacturer's application, driver or library.
+2. **Transparent data processing.** The analysis (baseline, peak position, width and area, energy conversion)
+   is described in [Data analysis](#data-analysis) and tested against reference cases, and exported files
+   record the acquisition settings (integration time, averaging, smoothing, dark subtraction).
+3. **Access without installation.** The software runs in a web browser on any common operating system,
+   including mobile devices, so that a measurement can be made wherever the instrument is taken, for teaching
+   and fieldwork as well as in the laboratory. (Windows and Linux need a one-time permission step for USB
+   access; see [Platform requirements](#platform-requirements).)
+4. **Openness and extensibility.** The source is released under the MIT licence with no build step and no
+   dependencies, so it can be read, verified, adapted and extended to further instruments
+   ([Supported instruments](#supported-instruments)).
 
-- **Use the published page,** <https://berameric.github.io/spektra/>. Nothing has to be installed, and
-  measurements stay in your browser until you export them.
-- **Run your own copy.** The repository is the complete application, plain files with no build step: download
-  or clone it and serve the folder (`npm start`, or any static web server), for example on a lab computer
-  without internet access, or to change it for your own work under the MIT licence.
+Spektra can be used from the published page, <https://berameric.github.io/spektra/>, where nothing is installed
+and measurements remain in the browser until exported; or the repository can be downloaded and served locally
+(`npm start` or any static web server), for example on a computer without internet access.
 
 ## Getting started
 
