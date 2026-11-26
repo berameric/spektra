@@ -16,6 +16,7 @@ import { checkEnvironment, initEnvironment } from "./ui/environment.js";
 import { toast } from "./ui/notify.js";
 import { initPlot, redrawPlot, resetView, zoomToPeak, zoomToSelection } from "./ui/plot.js";
 import { $, clamp, store } from "./util.js";
+import { VERSION } from "./version.js";
 
 store.remove("hdx.rois.v1"); // saved regions of an earlier version
 store.remove("hdx.theme"); // the light theme was removed
@@ -60,6 +61,7 @@ $("peaksCopy").addEventListener("click", async () => {
 $("detectScope").addEventListener("click", (e) => { if (e.target.closest('[data-act="clear-sel"]')) clearSelection(); });
 initEnvironment();
 watchDevice();
+$("versionLink").textContent = `v${VERSION}`;
 
 // ---------------------------------------------------------------- top bar
 $("connectBtn").addEventListener("click", connect);

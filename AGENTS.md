@@ -34,6 +34,7 @@ install: the repository root is the site (GitHub Pages serves `main` as is).
 | `src/main.js` | Entry point: wires controls to actions, keyboard shortcuts, start-up |
 | `src/state.js` | The shared state object `S` and display-unit helpers |
 | `src/config.js` | Constants, storage keys, peak colours (read from CSS tokens), `MOCK` |
+| `src/version.js` | The version number; the only place it is written in the code |
 | `src/acquisition.js` | Connect, acquire, live loop, exposure, dark |
 | `src/spectrum.js` | Frame → display unit, peak detection, render scheduling (one render per frame) |
 | `src/export.js` | CSV and PNG export |
@@ -84,9 +85,21 @@ pass callbacks (as `initPlot(handlers)` does) when a lower module must reach a h
 
 - **Never push to `main`.** GitHub Pages publishes `main` as is, so every change reaches it through a pull
   request that the maintainer merges.
-- **One change per branch, one branch per pull request,** branched from the current `main` and named by kind:
-  `feat/…`, `fix/…`, `docs/…`, `refactor/…`, `test/…`.
+- **Work locally, open a pull request when the work is complete.** Branch from the current `main`, named by
+  kind (`feat/…`, `fix/…`, `docs/…`, `refactor/…`, `test/…`, `release/…`), commit as you go and check the result
+  locally. Push and open the pull request once the feature, fix or release is finished; small related edits go
+  into it rather than into pull requests of their own.
 - **Keep pull requests independent,** so they can be merged in any order or left out. Do not build one on an
   unmerged branch; when two changes truly depend on each other, say so in both descriptions.
 - The description says what changed, why, and how it was tested: `npm test`, the `?mock` checks, and whether
   a real instrument was used (and which). Driver changes are not merged before a test on hardware.
+
+## Releases
+
+Versions follow semantic versioning: a fix raises the patch number, a new feature the minor number.
+
+1. On a `release/x.y.z` branch, set the version in `src/version.js`, `package.json` and the README's version
+   line, and add the `## x.y.z — date` entry at the top of `CHANGELOG.md`; `tests/test_version.mjs` fails
+   until all four agree.
+2. After the pull request is merged, tag the merge commit `vx.y.z` and publish a GitHub release whose notes
+   are the changelog entry.
