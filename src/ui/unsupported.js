@@ -5,6 +5,7 @@
 import { OBP2, OOI, PROTOCOL_NAMES } from "../device/profiles.js";
 import { describeDevice, probeObp } from "../device/probe.js";
 import { $ } from "../util.js";
+import { VERSION } from "../version.js";
 import { toast } from "./notify.js";
 
 const ISSUES = "https://github.com/berameric/spektra/issues/new";
@@ -53,7 +54,7 @@ export function showUnsupported(device, profile) {
   if (!$("unsupDlg")) build();
   current = {
     device, profile,
-    report: { spektra: "2.0.0", time: new Date().toISOString(), browser: navigator.userAgent, device: describeDevice(device) },
+    report: { spektra: VERSION, time: new Date().toISOString(), browser: navigator.userAgent, device: describeDevice(device) },
   };
   const known = profile && profile.protocol !== undefined;
   $("unsupTitle").textContent = known ? `${profile.model} is not supported yet` : "This instrument is not supported yet";

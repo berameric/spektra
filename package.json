@@ -1,12 +1,12 @@
 {
   "name": "spektra",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "license": "MIT",
-  "description": "Browser acquisition and peak analysis for the Ocean Insight HDX spectrometer",
+  "description": "Browser acquisition and peak analysis for Ocean Insight spectrometers",
   "type": "module",
   "scripts": {
-    "test": "node tests/test_web_analysis.mjs && node tests/test_web_usb.mjs",
+    "test": "node tests/test_web_analysis.mjs && node tests/test_web_usb.mjs && node tests/test_version.mjs",
     "start": "node scripts/serve.mjs",
     "dev": "node scripts/serve.mjs"
   }

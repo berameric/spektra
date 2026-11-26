@@ -5,6 +5,7 @@
 import { DIAG } from "../config.js";
 import { S } from "../state.js";
 import { $ } from "../util.js";
+import { VERSION } from "../version.js";
 import { toast } from "./notify.js";
 
 const MESSAGES = [0x00101000, 0x00101100];
@@ -79,7 +80,7 @@ async function run() {
     for (let round = 0; round < 2; round++) for (const t of MESSAGES) caps.push(await capture(t));
     const [a1, b1, a2, b2] = caps;
     report = {
-      spektra: "2.0.0", time: new Date().toISOString(), model: S.dev.model, serial: S.dev.serialNumber,
+      spektra: VERSION, time: new Date().toISOString(), model: S.dev.model, serial: S.dev.serialNumber,
       integrationMs: S.intMs, captures: caps.map(({ px, ...rest }) => rest),
       sameMessageRepeat: compare(a1, a2), otherMessageRepeat: compare(b1, b2), between: compare(a1, b1),
     };

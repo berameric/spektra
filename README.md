@@ -6,7 +6,7 @@ protocol. It is tested on the HDX; support for other models is being added and n
 instruments](#supported-instruments)). No software has to be installed, and the same page works on Windows,
 macOS, Linux, ChromeOS and Android devices.
 
-Application: <https://berameric.github.io/spektra/> · Version 2.0.0 ([changelog](CHANGELOG.md)) ·
+Application: <https://berameric.github.io/spektra/> · Version 2.1.0 ([changelog](CHANGELOG.md)) ·
 [MIT licence](LICENSE)
 
 ![Spektra on a computer: live spectrum with detected peaks and the peak table (simulated data)](assets/screenshot.png)
