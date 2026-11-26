@@ -10,7 +10,10 @@ const START = 0xc0c1, VERSION = 0x1100, END = 0xc2c3c4c5;
 const OBP_ERRORS = {
   1: "unsupported protocol", 2: "unknown message type", 3: "bad checksum", 4: "message too large",
   5: "payload length mismatch", 6: "invalid payload", 7: "device not ready", 8: "unknown checksum type",
-  9: "device reset", 10: "too many buses", 11: "out of memory", 12: "command not found",
+  9: "device reset", 10: "too many buses", 11: "out of memory", 12: "the requested information does not exist",
+  13: "internal device error", 100: "could not decrypt", 101: "invalid firmware layout", 102: "wrong data packet size",
+  103: "hardware revision not compatible with the firmware", 104: "flash map not compatible with the firmware",
+  255: "response deferred",
 };
 
 /** An error reported by the instrument, or no reply after all attempts. */

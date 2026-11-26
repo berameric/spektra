@@ -118,6 +118,8 @@ timeout makes acquisition robust to both.
 
 ## 5. Error numbers
 
+As listed in the OBP sections of Ocean Insight's STS and QE Pro data sheets and in python-seabreeze.
+
 | No. | Meaning | No. | Meaning |
 |---|---|---|---|
 | 1 | unsupported protocol | 7 | device not ready |
@@ -125,7 +127,9 @@ timeout makes acquisition robust to both.
 | 3 | bad checksum | 9 | device reset |
 | 4 | message too large | 10 | too many buses |
 | 5 | payload length mismatch | 11 | out of memory |
-| 6 | invalid payload | 12 | command not found |
+| 6 | invalid payload | 12 | valid message, but the requested information does not exist |
+| 13 | internal device error | 100–104 | firmware update errors (decryption, layout, packet size, hardware revision, flash map) |
+| 255 | response deferred | | |
 
 ## 6. Connection sequence and recovery
 
