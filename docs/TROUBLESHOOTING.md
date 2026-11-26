@@ -47,7 +47,7 @@ holding the device is the likely cause.
 
 ## 2. "No reply to message ... after N attempts"
 
-Spektra sent a request and received no reply. It repeats the request up to four times, and on a "No
+Spektra sent a request and received no reply. It sends the request up to four times in all, and on a "No
 reply" failure it issues a USB reset, waits 3 s for the device to settle, locates the device again and
 repeats the connection sequence once. If it still does not answer, the instrument itself needs resetting.
 
