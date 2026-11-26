@@ -13,6 +13,25 @@ Application: <https://berameric.github.io/spektra/> · Version 2.0.0 ([changelog
 
 *Figure 1. Spektra on a computer, with simulated data.*
 
+## Why Spektra
+
+A spectrometer is usually tied to the computer it was set up on: the manufacturer's application, its USB
+driver and often an SDK have to be installed there, and taking a quick measurement on another computer, a
+laptop in the lab or a phone means repeating that set-up, if the system is supported at all. Writing your own
+acquisition code means learning the instrument's protocol or a vendor library first.
+
+Spektra removes these steps. It speaks the instrument's protocol itself, inside the browser, so nothing from
+the manufacturer is needed: open the page, connect the spectrometer and measure. (Windows and Linux still need
+a one-time permission step for USB access, described under [Platform requirements](#platform-requirements).)
+
+There are two ways to use it:
+
+- **Use the published page,** <https://berameric.github.io/spektra/>. Nothing has to be installed, and
+  measurements stay in your browser until you export them.
+- **Run your own copy.** The repository is the complete application, plain files with no build step: download
+  or clone it and serve the folder (`npm start`, or any static web server), for example on a lab computer
+  without internet access, or to change it for your own work under the MIT licence.
+
 ## Getting started
 
 1. Open <https://berameric.github.io/spektra/> in Google Chrome or Microsoft Edge.
